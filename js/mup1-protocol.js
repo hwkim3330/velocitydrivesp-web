@@ -1,5 +1,5 @@
 // Microchip UART Protocol #1 (MUP1) Implementation
-export class MUP1Protocol {
+class MUP1Protocol {
     constructor() {
         this.buffer = '';
         this.messageId = 0;
@@ -247,4 +247,88 @@ export class MUP1Protocol {
             return null;
         }
     }
+    
+    // Build frame based on CT analysis
+    buildFrame(type, data) {
+        if (type === 'p') {
+            // Ping frame from CT: >p<<8553
+            return new TextEncoder().encode('>p<<8553\n');
+        }
+        
+        if (type === 'c' && data instanceof Uint8Array) {
+            // CoAP frame: >c[binary_data]<checksum
+            let frame = '>c[';
+            // Convert binary to escaped format
+            const escaped = this.escapeBinary(data);
+            frame += escaped + ']<';
+            
+            // Calculate proper checksum
+            const checksum = this.calculateMUP1Checksum(frame + '<');
+            frame += checksum;
+            
+            return new TextEncoder().encode(frame + '\n');
+        }
+        
+        // Default frame construction
+        return new TextEncoder().encode(this.encode(type, data) + '\n');
+    }
+    
+    escapeBinary(data) {
+        let result = '';
+        for (let i = 0; i < data.length; i++) {
+            const byte = data[i];
+            if (byte === 0x5B || byte === 0x5D || byte === 0x3E || byte === 0x3C || byte === 0x5C) {
+                // Escape special characters: [ ] > < \
+                result += '\\' + String.fromCharCode(byte);
+            } else if (byte >= 32 && byte <= 126) {
+                // Printable ASCII
+                result += String.fromCharCode(byte);
+            } else {
+                // Non-printable as hex
+                result += '\\x' + byte.toString(16).padStart(2, '0');
+            }
+        }
+        return result;
+    }
+    
+    calculateMUP1Checksum(data) {
+        // 16-bit one's complement checksum as per CT
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) {
+            sum += data.charCodeAt(i);
+        }
+        
+        // Handle overflow
+        while (sum >> 16) {
+            sum = (sum & 0xFFFF) + (sum >> 16);
+        }
+        
+        // One's complement
+        sum = ~sum & 0xFFFF;
+        
+        // Return as 4-char hex string
+        return sum.toString(16).toUpperCase().padStart(4, '0');
+    }
+    
+    // Parse pong response based on CT
+    parsePong(data) {
+        // Format: VelocitySP-v2025.06-LAN9662-ung8291 14000 300 2
+        const parts = data.toString().split(' ');
+        return {
+            version: parts[0],
+            uptime: parseInt(parts[1]) || 0,
+            maxSize: parseInt(parts[2]) || 300,
+            mup1Version: parseInt(parts[3]) || 2
+        };
+    }
+    
+    // Process incoming byte for state machine
+    processByte(byte) {
+        // Simple state machine for MUP1 frame detection
+        // This should be enhanced based on actual protocol
+        return null;
+    }
 }
+
+// Export for use
+window.MUP1Protocol = MUP1Protocol;
