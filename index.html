@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VelocityDRIVE SP Web Configuration Tool</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">
+                    <span class="material-icons">router</span>
+                    VelocityDRIVE SP Configuration Tool
+                </h1>
+                <div class="header-actions">
+                    <button id="connectBtn" class="btn btn-primary">
+                        <span class="material-icons">usb</span>
+                        Connect Serial
+                    </button>
+                    <button id="disconnectBtn" class="btn btn-danger" style="display:none;">
+                        <span class="material-icons">usb_off</span>
+                        Disconnect
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3>Connection Status</h3>
+                    <div class="connection-info">
+                        <div class="status-indicator" id="statusIndicator">
+                            <span class="status-dot"></span>
+                            <span class="status-text">Disconnected</span>
+                        </div>
+                        <div class="port-info" id="portInfo" style="display:none;">
+                            <span class="material-icons">cable</span>
+                            <span id="portName">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Navigation</h3>
+                    <nav class="nav-menu">
+                        <button class="nav-item active" data-tab="system">
+                            <span class="material-icons">dashboard</span>
+                            System Info
+                        </button>
+                        <button class="nav-item" data-tab="interfaces">
+                            <span class="material-icons">lan</span>
+                            Interfaces
+                        </button>
+                        <button class="nav-item" data-tab="yang">
+                            <span class="material-icons">code</span>
+                            YANG Browser
+                        </button>
+                        <button class="nav-item" data-tab="tsn">
+                            <span class="material-icons">schedule</span>
+                            TSN Configuration
+                        </button>
+                        <button class="nav-item" data-tab="monitor">
+                            <span class="material-icons">analytics</span>
+                            Monitoring
+                        </button>
+                        <button class="nav-item" data-tab="logs">
+                            <span class="material-icons">description</span>
+                            Logs
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Quick Actions</h3>
+                    <div class="quick-actions">
+                        <button id="rebootBtn" class="btn btn-secondary btn-sm">
+                            <span class="material-icons">restart_alt</span>
+                            Reboot Device
+                        </button>
+                        <button id="saveConfigBtn" class="btn btn-secondary btn-sm">
+                            <span class="material-icons">save</span>
+                            Save Config
+                        </button>
+                        <button id="exportBtn" class="btn btn-secondary btn-sm">
+                            <span class="material-icons">download</span>
+                            Export
+                        </button>
+                        <button id="importBtn" class="btn btn-secondary btn-sm">
+                            <span class="material-icons">upload</span>
+                            Import
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- System Info Tab -->
+                <div class="tab-content active" id="system-tab">
+                    <div class="content-header">
+                        <h2>System Information</h2>
+                        <button class="btn btn-icon" id="refreshSystemBtn">
+                            <span class="material-icons">refresh</span>
+                        </button>
+                    </div>
+                    <div class="card">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Platform:</label>
+                                <span id="platform">--</span>
+                            </div>
+                            <div class="info-item">
+                                <label>OS Name:</label>
+                                <span id="osName">--</span>
+                            </div>
+                            <div class="info-item">
+                                <label>OS Version:</label>
+                                <span id="osVersion">--</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Hostname:</label>
+                                <span id="hostname">--</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Current Time:</label>
+                                <span id="currentTime">--</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Boot Time:</label>
+                                <span id="bootTime">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interfaces Tab -->
+                <div class="tab-content" id="interfaces-tab">
+                    <div class="content-header">
+                        <h2>Network Interfaces</h2>
+                        <button class="btn btn-icon" id="refreshInterfacesBtn">
+                            <span class="material-icons">refresh</span>
+                        </button>
+                    </div>
+                    <div class="interfaces-grid" id="interfacesContainer">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- YANG Browser Tab -->
+                <div class="tab-content" id="yang-tab">
+                    <div class="content-header">
+                        <h2>YANG Configuration Browser</h2>
+                        <div class="yang-actions">
+                            <select id="yangModule" class="select">
+                                <option value="">Select Module...</option>
+                            </select>
+                            <button class="btn btn-secondary" id="loadModuleBtn">Load</button>
+                        </div>
+                    </div>
+                    <div class="yang-container">
+                        <div class="yang-tree" id="yangTree">
+                            <!-- YANG tree structure -->
+                        </div>
+                        <div class="yang-editor">
+                            <div class="editor-header">
+                                <h3>Configuration Editor</h3>
+                                <div class="editor-actions">
+                                    <button class="btn btn-sm" id="validateBtn">Validate</button>
+                                    <button class="btn btn-sm btn-primary" id="applyBtn">Apply</button>
+                                </div>
+                            </div>
+                            <textarea id="yangEditor" class="code-editor"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TSN Configuration Tab -->
+                <div class="tab-content" id="tsn-tab">
+                    <div class="content-header">
+                        <h2>TSN Configuration</h2>
+                    </div>
+                    <div class="tsn-sections">
+                        <!-- CBS Configuration -->
+                        <div class="card">
+                            <h3>CBS (Credit-Based Shaper)</h3>
+                            <div class="form-group">
+                                <label>Priority Mapping:</label>
+                                <div class="priority-mapping">
+                                    <div class="mapping-row">
+                                        <span>PCP 0-3 → Priority 6</span>
+                                        <input type="number" id="cbsPriority6BW" placeholder="Bandwidth (Mbps)" value="3.5">
+                                    </div>
+                                    <div class="mapping-row">
+                                        <span>PCP 4-7 → Priority 2</span>
+                                        <input type="number" id="cbsPriority2BW" placeholder="Bandwidth (Mbps)" value="1.5">
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" id="applyCBSBtn">Apply CBS Config</button>
+                            </div>
+                        </div>
+
+                        <!-- TAS Configuration -->
+                        <div class="card">
+                            <h3>TAS (Time-Aware Shaper)</h3>
+                            <div class="form-group">
+                                <label>Cycle Time (ms):</label>
+                                <input type="number" id="tasCycleTime" value="200">
+                            </div>
+                            <div class="form-group">
+                                <label>Queue Schedule:</label>
+                                <div class="queue-schedule" id="queueSchedule">
+                                    <!-- Dynamically populated -->
+                                </div>
+                                <button class="btn btn-primary" id="applyTASBtn">Apply TAS Config</button>
+                            </div>
+                        </div>
+
+                        <!-- PTP Configuration -->
+                        <div class="card">
+                            <h3>PTP (Precision Time Protocol)</h3>
+                            <div class="form-group">
+                                <label>PTP Mode:</label>
+                                <select id="ptpMode" class="select">
+                                    <option value="master">Master</option>
+                                    <option value="slave">Slave</option>
+                                    <option value="boundary">Boundary Clock</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Domain:</label>
+                                <input type="number" id="ptpDomain" value="0" min="0" max="255">
+                            </div>
+                            <button class="btn btn-primary" id="applyPTPBtn">Apply PTP Config</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monitoring Tab -->
+                <div class="tab-content" id="monitor-tab">
+                    <div class="content-header">
+                        <h2>Real-Time Monitoring</h2>
+                        <div class="monitor-controls">
+                            <button class="btn btn-secondary" id="startMonitorBtn">
+                                <span class="material-icons">play_arrow</span>
+                                Start
+                            </button>
+                            <button class="btn btn-secondary" id="stopMonitorBtn" style="display:none;">
+                                <span class="material-icons">stop</span>
+                                Stop
+                            </button>
+                        </div>
+                    </div>
+                    <div class="monitor-grid">
+                        <div class="card">
+                            <h3>Port Statistics</h3>
+                            <div id="portStats" class="stats-container">
+                                <!-- Port statistics -->
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>Traffic Analysis</h3>
+                            <canvas id="trafficChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs Tab -->
+                <div class="tab-content" id="logs-tab">
+                    <div class="content-header">
+                        <h2>System Logs</h2>
+                        <div class="log-controls">
+                            <select id="logLevel" class="select">
+                                <option value="all">All</option>
+                                <option value="error">Errors</option>
+                                <option value="warning">Warnings</option>
+                                <option value="info">Info</option>
+                                <option value="debug">Debug</option>
+                            </select>
+                            <button class="btn btn-icon" id="clearLogsBtn">
+                                <span class="material-icons">clear</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="log-viewer" id="logViewer">
+                        <!-- Log entries -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Status Bar -->
+        <footer class="status-bar">
+            <div class="status-left">
+                <span id="statusMessage">Ready</span>
+            </div>
+            <div class="status-right">
+                <span id="rxBytes">RX: 0 B</span>
+                <span id="txBytes">TX: 0 B</span>
+                <span id="uptime">Uptime: --</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Modal Title</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalCancel">Cancel</button>
+                <button class="btn btn-primary" id="modalConfirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
