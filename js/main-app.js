@@ -665,7 +665,12 @@ class VelocityDriveApp {
             console.log('Sending CoAP FETCH for', path, 'SID:', sid);
             console.log('CoAP bytes:', Array.from(coapMessage).map(b => b.toString(16).padStart(2, '0')).join(' '));
             
-            await this.serial.write(mup1Frame);
+            // Send as binary if it's Uint8Array, otherwise as string
+            if (mup1Frame instanceof Uint8Array) {
+                await this.serial.writeBytes(mup1Frame);
+            } else {
+                await this.serial.write(mup1Frame);
+            }
         } catch (error) {
             console.error('Failed to get YANG data:', error);
         }
@@ -685,29 +690,44 @@ class VelocityDriveApp {
     }
     
     buildMUP1CoAPFrame(coapData) {
-        // Build MUP1 frame: >c[binary_data]<checksum\n
-        let frame = '>c[';
+        // Build MUP1 frame with raw binary: >c[BINARY]<checksum\n
+        // Create frame parts as binary
+        const startBytes = new TextEncoder().encode('>c[');
+        const endBytes = new TextEncoder().encode(']<<');
         
-        // Add CoAP data as escaped binary
-        for (let i = 0; i < coapData.length; i++) {
-            const byte = coapData[i];
-            // Escape special MUP1 characters
-            if (byte === 0x5B || byte === 0x5D || byte === 0x3E || byte === 0x3C || byte === 0x5C) {
-                frame += '\\x' + byte.toString(16).padStart(2, '0');
-            } else if (byte >= 32 && byte <= 126) {
-                frame += String.fromCharCode(byte);
-            } else {
-                frame += '\\x' + byte.toString(16).padStart(2, '0');
-            }
+        // Combine all parts for checksum calculation
+        const frameWithoutChecksum = new Uint8Array([
+            ...startBytes,
+            ...coapData,
+            ...endBytes
+        ]);
+        
+        // Calculate checksum on the complete frame
+        let sum = 0;
+        for (let i = 0; i < frameWithoutChecksum.length; i++) {
+            sum += frameWithoutChecksum[i];
         }
         
-        frame += ']<';
+        // 16-bit one's complement
+        while (sum >> 16) {
+            sum = (sum & 0xFFFF) + (sum >> 16);
+        }
+        sum = ~sum & 0xFFFF;
         
-        // Calculate checksum
-        const checksum = this.calculateMUP1Checksum(frame + '<');
-        frame += checksum + '\n';
+        const checksumStr = sum.toString(16).toUpperCase().padStart(4, '0');
+        const checksumBytes = new TextEncoder().encode(checksumStr + '\n');
         
-        return frame;
+        // Build complete frame as binary
+        const completeFrame = new Uint8Array([
+            ...startBytes,
+            ...coapData,
+            ...new TextEncoder().encode(']<<'),
+            ...checksumBytes
+        ]);
+        
+        // Return as string for serial.write()
+        // Since we're dealing with binary, we need to send it properly
+        return completeFrame;
     }
     
     calculateMUP1Checksum(data) {
@@ -773,7 +793,12 @@ class VelocityDriveApp {
             console.log('Sending CoAP iPATCH for', path, 'SID:', sid, 'Value:', value);
             console.log('CoAP bytes:', Array.from(coapMessage).map(b => b.toString(16).padStart(2, '0')).join(' '));
             
-            await this.serial.write(mup1Frame);
+            // Send as binary if it's Uint8Array, otherwise as string
+            if (mup1Frame instanceof Uint8Array) {
+                await this.serial.writeBytes(mup1Frame);
+            } else {
+                await this.serial.write(mup1Frame);
+            }
         } catch (error) {
             console.error('Failed to set YANG data:', error);
         }

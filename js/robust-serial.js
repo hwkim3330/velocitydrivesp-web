@@ -204,6 +204,21 @@ class RobustSerialController {
             throw error;
         }
     }
+    
+    async writeBytes(bytes) {
+        if (!this.writer) {
+            throw new Error('Not connected');
+        }
+        
+        try {
+            // Direct binary write
+            await this.writer.write(bytes);
+            console.log('Sent bytes:', Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' '));
+        } catch (error) {
+            console.error('Write bytes error:', error);
+            throw error;
+        }
+    }
 
     async disconnect() {
         this.isConnected = false;
