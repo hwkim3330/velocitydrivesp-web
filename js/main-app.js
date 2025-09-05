@@ -1,3 +1,15 @@
+// Load protocol modules
+if (!window.MUP1Protocol) {
+    const script1 = document.createElement('script');
+    script1.src = 'js/mup1-protocol.js';
+    document.head.appendChild(script1);
+}
+if (!window.CoAPProtocol) {
+    const script2 = document.createElement('script');
+    script2.src = 'js/coap-protocol.js';
+    document.head.appendChild(script2);
+}
+
 // Main Application Controller
 class VelocityDriveApp {
     constructor() {
@@ -74,7 +86,9 @@ class VelocityDriveApp {
             
             if (connected) {
                 this.isConnected = true;
-                this.mup1 = new MUP1Protocol(this.serial);
+                // Initialize protocols
+                this.mup1 = new window.MUP1Protocol();
+                this.coap = new window.CoAPProtocol();
                 
                 // Update UI
                 document.getElementById('connectBtn').textContent = 'Disconnect';
@@ -125,13 +139,14 @@ class VelocityDriveApp {
     handleSerialData(data) {
         console.log('Serial data:', data);
         
-        // Parse MUP1 frames if we have the protocol handler
+        // Process each byte through MUP1 state machine
         if (this.mup1) {
-            try {
-                const frames = this.mup1.parseFrames(data);
-                frames.forEach(frame => this.handleMUP1Frame(frame));
-            } catch (error) {
-                console.error('Frame parsing error:', error);
+            const bytes = new TextEncoder().encode(data);
+            for (const byte of bytes) {
+                const frame = this.mup1.processByte(byte);
+                if (frame) {
+                    this.handleMUP1Frame(frame);
+                }
             }
         }
     }
@@ -139,19 +154,44 @@ class VelocityDriveApp {
     handleMUP1Frame(frame) {
         console.log('MUP1 Frame:', frame);
         
-        // Handle different frame types
+        // Handle different frame types (based on CT analysis)
         switch (frame.type) {
-            case 'R': // Response
-                this.handleResponse(frame.data);
+            case 'P': // Pong response
+                const pongInfo = this.mup1.parsePong(frame.data);
+                console.log('PONG received:', pongInfo);
+                this.updateSystemInfo({
+                    status: 'Connected',
+                    version: pongInfo.version,
+                    uptime: `${pongInfo.uptime} seconds`,
+                    maxDataSize: `${pongInfo.maxSize} bytes`,
+                    mup1Version: pongInfo.mup1Version
+                });
                 break;
-            case 'E': // Error
-                this.handleError(frame.data);
+            case 'C': // CoAP response
+                this.handleCoAPResponse(frame.data);
                 break;
-            case 'I': // Info
-                this.handleInfo(frame.data);
+            case 'A': // Announce
+                console.log('Device announced:', new TextDecoder().decode(frame.data));
+                break;
+            case 'T': // Trace
+                console.log('Trace:', new TextDecoder().decode(frame.data));
                 break;
             default:
                 console.log('Unknown frame type:', frame.type);
+        }
+    }
+    
+    handleCoAPResponse(data) {
+        try {
+            const coap = this.coap.parseMessage(data);
+            console.log('CoAP response:', coap);
+            
+            if (coap.payload) {
+                // TODO: Parse CBOR payload
+                console.log('Payload (hex):', Array.from(coap.payload).map(b => b.toString(16).padStart(2, '0')).join(' '));
+            }
+        } catch (error) {
+            console.error('CoAP parse error:', error);
         }
     }
 
@@ -174,17 +214,11 @@ class VelocityDriveApp {
         try {
             this.currentCommand = 'system-info';
             
-            // Send system info request
-            if (this.mup1) {
-                await this.mup1.sendCommand('GET', '/ietf-system:system-state');
-                
-                // Also try direct approach
-                setTimeout(async () => {
-                    if (this.serial && this.serial.isConnected) {
-                        // Send a simple command to get version
-                        await this.serial.write('>V<\n');
-                    }
-                }, 500);
+            // Send MUP1 ping (confirmed from CT logs)
+            if (this.mup1 && this.serial) {
+                const pingFrame = this.mup1.buildFrame('p');
+                console.log('Sending ping:', new TextDecoder().decode(pingFrame));
+                await this.serial.write(new TextDecoder().decode(pingFrame));
             }
             
             // Fallback - show connected status even if no immediate response
