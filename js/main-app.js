@@ -237,15 +237,57 @@ class VelocityDriveApp {
     handleSerialData(data) {
         console.log('Serial data:', data);
         
-        // Process each byte through MUP1 state machine
+        // Accumulate data and process MUP1 frames
         if (this.mup1) {
-            const bytes = new TextEncoder().encode(data);
-            for (const byte of bytes) {
-                const frame = this.mup1.processByte(byte);
-                if (frame) {
-                    this.handleMUP1Frame(frame);
-                }
+            // Add to MUP1 buffer
+            if (!this.mup1.buffer) {
+                this.mup1.buffer = '';
             }
+            this.mup1.buffer += data;
+            
+            // Look for complete frames (ending with newline)
+            let frameEnd = this.mup1.buffer.indexOf('\n');
+            while (frameEnd !== -1) {
+                const frameStr = this.mup1.buffer.substring(0, frameEnd);
+                this.mup1.buffer = this.mup1.buffer.substring(frameEnd + 1);
+                
+                // Process complete frame
+                if (frameStr.startsWith('>') && frameStr.includes('<')) {
+                    const frame = this.parseMUP1Frame(frameStr);
+                    if (frame) {
+                        this.handleMUP1Frame(frame);
+                    }
+                }
+                
+                frameEnd = this.mup1.buffer.indexOf('\n');
+            }
+        }
+    }
+    
+    parseMUP1Frame(frameStr) {
+        try {
+            // Extract frame type and data
+            const typeChar = frameStr[1];
+            const dataStart = frameStr.indexOf('[');
+            const dataEnd = frameStr.indexOf(']');
+            const checksumStart = frameStr.lastIndexOf('<');
+            
+            let data = '';
+            if (dataStart > 0 && dataEnd > dataStart) {
+                data = frameStr.substring(dataStart + 1, dataEnd);
+            } else if (checksumStart > 2) {
+                // No brackets, data is between type and checksum marker
+                data = frameStr.substring(2, checksumStart);
+            }
+            
+            return {
+                type: typeChar,
+                data: data,
+                raw: frameStr
+            };
+        } catch (error) {
+            console.error('Failed to parse MUP1 frame:', error, frameStr);
+            return null;
         }
     }
 
@@ -255,24 +297,39 @@ class VelocityDriveApp {
         // Handle different frame types (based on CT analysis)
         switch (frame.type) {
             case 'P': // Pong response
-                const pongInfo = this.mup1.parsePong(frame.data);
+                // Format: VelocitySP-v2025.06-LAN9662-ung8291 24913 300 2
+                const parts = frame.data.split(' ');
+                const pongInfo = {
+                    version: parts[0] || 'Unknown',
+                    uptime: parseInt(parts[1]) || 0,
+                    maxSize: parseInt(parts[2]) || 300,
+                    mup1Version: parseInt(parts[3]) || 2
+                };
                 console.log('PONG received:', pongInfo);
                 this.updateSystemInfo({
                     status: 'Connected',
                     version: pongInfo.version,
                     uptime: `${pongInfo.uptime} seconds`,
                     maxDataSize: `${pongInfo.maxSize} bytes`,
-                    mup1Version: pongInfo.mup1Version
+                    mup1Version: `v${pongInfo.mup1Version}`
                 });
+                
+                // Update connection status
+                const statusIndicator = document.getElementById('statusIndicator');
+                if (statusIndicator) {
+                    statusIndicator.querySelector('.status-text').textContent = 'Connected';
+                    statusIndicator.classList.add('connected');
+                }
                 break;
             case 'C': // CoAP response
+                // CoAP data is binary, need to parse it
                 this.handleCoAPResponse(frame.data);
                 break;
             case 'A': // Announce
-                console.log('Device announced:', new TextDecoder().decode(frame.data));
+                console.log('Device announced:', frame.data);
                 break;
             case 'T': // Trace
-                console.log('Trace:', new TextDecoder().decode(frame.data));
+                console.log('Trace:', frame.data);
                 break;
             default:
                 console.log('Unknown frame type:', frame.type);
