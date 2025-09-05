@@ -1,21 +1,31 @@
-// Main Application Module
+// Main Application Module - Enhanced VelocityDRIVE SP Configuration Tool
 import { SerialController } from './serial-controller.js';
 import { MUP1Protocol } from './mup1-protocol.js';
 import { CORECONFClient } from './coreconf-client.js';
 import { YANGBrowser } from './yang-browser.js';
 import { UIController } from './ui-controller.js';
 import { MonitoringService } from './monitoring-service.js';
+import { DeviceManager } from './device-manager.js';
+import { FRERManager } from './frer-manager.js';
+import { PSFPManager } from './psfp-manager.js';
+import { CoAPClient } from './coap-client.js';
 
 class VelocityDriveSPApp {
     constructor() {
-        this.serial = new SerialController();
-        this.protocol = new MUP1Protocol();
-        this.coreconf = new CORECONFClient(this.serial, this.protocol);
-        this.yangBrowser = new YANGBrowser(this.coreconf);
+        // Core services
         this.ui = new UIController();
-        this.monitoring = new MonitoringService(this.coreconf);
+        this.deviceManager = new DeviceManager();
         
+        // Current device services (will be set when device is connected)
+        this.coreconf = null;
+        this.yangBrowser = null;
+        this.monitoring = null;
+        this.frermgr = null;
+        this.psfpmgr = null;
+        
+        // Application state
         this.isConnected = false;
+        this.currentDevice = null;
         this.rxBytes = 0;
         this.txBytes = 0;
         
@@ -130,13 +140,21 @@ class VelocityDriveSPApp {
     
     async connect() {
         try {
-            this.ui.updateStatus('Connecting...', 'info');
+            this.ui.updateStatus('Discovering devices...', 'info');
             
-            // Request serial port
-            const port = await navigator.serial.requestPort();
+            // Show device selection dialog
+            const devices = await this.deviceManager.startDiscovery();
+            const selectedDevice = await this.showDeviceSelectionDialog(devices);
             
-            // Connect with default settings
-            await this.serial.connect(port, {
+            if (!selectedDevice) {
+                this.ui.updateStatus('Connection cancelled', 'warning');
+                return;
+            }
+            
+            this.ui.updateStatus('Connecting to device...', 'info');
+            
+            // Connect to selected device
+            const device = await this.deviceManager.connectDevice(selectedDevice.id, {
                 baudRate: 115200,
                 dataBits: 8,
                 stopBits: 1,
@@ -144,9 +162,221 @@ class VelocityDriveSPApp {
                 flowControl: 'none'
             });
             
+            // Setup device services
+            await this.setupDeviceServices(device);
+            
         } catch (error) {
             console.error('Connection failed:', error);
             this.ui.showError('Failed to connect: ' + error.message);
+        }
+    }
+    
+    // Show device selection dialog
+    async showDeviceSelectionDialog(devices) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            const modalConfirm = document.getElementById('modalConfirm');
+            const modalCancel = document.getElementById('modalCancel');
+            
+            modalTitle.textContent = 'Select Device';
+            modalConfirm.textContent = 'Connect';
+            modalCancel.style.display = 'inline-block';
+            
+            let selectedDevice = null;
+            
+            // Create device list
+            const deviceList = document.createElement('div');
+            deviceList.className = 'device-list';
+            
+            if (devices.length === 0) {
+                deviceList.innerHTML = '<p>No devices found. Please connect a VelocityDRIVE SP device.</p>';
+                modalConfirm.disabled = true;
+            } else {
+                devices.forEach((device, index) => {
+                    const deviceItem = document.createElement('div');
+                    deviceItem.className = 'device-item';
+                    deviceItem.innerHTML = `
+                        <input type="radio" name="device" id="device${index}" value="${device.id}">
+                        <label for="device${index}">
+                            <div class="device-info">
+                                <div class="device-name">${device.name}</div>
+                                <div class="device-type">${device.connectionType} (${device.type})</div>
+                                <div class="device-details">${device.type === 'serial' ? 'USB Serial' : device.ipAddress}</div>
+                            </div>
+                        </label>
+                    `;
+                    
+                    const radio = deviceItem.querySelector('input[type="radio"]');
+                    radio.addEventListener('change', () => {
+                        if (radio.checked) {
+                            selectedDevice = device;
+                            modalConfirm.disabled = false;
+                        }
+                    });
+                    
+                    deviceList.appendChild(deviceItem);
+                });
+            }
+            
+            modalBody.innerHTML = '';
+            modalBody.appendChild(deviceList);
+            
+            // Add "Request New Serial Port" button for manual selection
+            const requestButton = document.createElement('button');
+            requestButton.className = 'btn btn-secondary';
+            requestButton.textContent = 'Request New Serial Port';
+            requestButton.onclick = async () => {
+                try {
+                    const port = await navigator.serial.requestPort();
+                    const info = port.getInfo();
+                    selectedDevice = {
+                        id: `manual-${Date.now()}`,
+                        type: 'serial',
+                        name: 'Manual Serial Device',
+                        connectionType: 'MUP1',
+                        port: port,
+                        info: info,
+                        status: 'discovered'
+                    };
+                    modalConfirm.disabled = false;
+                } catch (error) {
+                    console.error('Failed to request serial port:', error);
+                }
+            };
+            modalBody.appendChild(requestButton);
+            
+            modal.style.display = 'flex';
+            
+            const handleConfirm = () => {
+                modal.style.display = 'none';
+                modalConfirm.removeEventListener('click', handleConfirm);
+                modalCancel.removeEventListener('click', handleCancel);
+                resolve(selectedDevice);
+            };
+            
+            const handleCancel = () => {
+                modal.style.display = 'none';
+                modalConfirm.removeEventListener('click', handleConfirm);
+                modalCancel.removeEventListener('click', handleCancel);
+                resolve(null);
+            };
+            
+            modalConfirm.addEventListener('click', handleConfirm);
+            modalCancel.addEventListener('click', handleCancel);
+        });
+    }
+    
+    // Setup device services after connection
+    async setupDeviceServices(device) {
+        this.currentDevice = device;
+        this.coreconf = device.coreconf;
+        
+        // Initialize YANG browser
+        this.yangBrowser = new YANGBrowser(this.coreconf);
+        
+        // Initialize monitoring service
+        this.monitoring = new MonitoringService(this.coreconf);
+        
+        // Initialize FRER manager
+        this.frermgr = new FRERManager(this.coreconf);
+        await this.frermgr.initialize().catch(error => 
+            console.warn('FRER initialization failed:', error)
+        );
+        
+        // Initialize PSFP manager
+        this.psfpmgr = new PSFPManager(this.coreconf);
+        await this.psfpmgr.initialize().catch(error => 
+            console.warn('PSFP initialization failed:', error)
+        );
+        
+        // Setup event handlers
+        this.setupDeviceEventHandlers(device);
+        
+        // Mark as connected
+        this.isConnected = true;
+        
+        this.ui.updateStatus(`Connected to ${device.name}`, 'success');
+    }
+    
+    // Setup device event handlers
+    setupDeviceEventHandlers(device) {
+        // Device manager events
+        this.deviceManager.on('deviceData', (event) => {
+            if (event.detail.deviceId === device.id) {
+                this.handleDeviceData(event.detail.data);
+            }
+        });
+        
+        this.deviceManager.on('deviceError', (event) => {
+            if (event.detail.deviceId === device.id) {
+                this.handleDeviceError(event.detail.error);
+            }
+        });
+        
+        this.deviceManager.on('deviceDisconnected', (event) => {
+            if (event.detail.deviceId === device.id) {
+                this.handleDeviceDisconnected();
+            }
+        });
+        
+        // FRER events
+        if (this.frermgr) {
+            this.frermgr.on('statisticsUpdated', (event) => {
+                this.updateFRERStatistics(event.detail);
+            });
+        }
+        
+        // PSFP events
+        if (this.psfpmgr) {
+            this.psfpmgr.on('statisticsUpdated', (event) => {
+                this.updatePSFPStatistics(event.detail);
+            });
+        }
+    }
+    
+    // Handle device data
+    handleDeviceData(data) {
+        this.rxBytes += data.length;
+        document.getElementById('rxBytes').textContent = `RX: ${this.formatBytes(this.rxBytes)}`;
+    }
+    
+    // Handle device error
+    handleDeviceError(error) {
+        console.error('Device error:', error);
+        this.ui.showError('Device error: ' + error.message);
+        this.addLog('Device error: ' + error.message, 'error');
+    }
+    
+    // Handle device disconnection
+    handleDeviceDisconnected() {
+        this.isConnected = false;
+        this.currentDevice = null;
+        this.coreconf = null;
+        
+        // Update UI
+        document.getElementById('connectBtn').style.display = 'block';
+        document.getElementById('disconnectBtn').style.display = 'none';
+        
+        const statusIndicator = document.getElementById('statusIndicator');
+        statusIndicator.classList.remove('connected');
+        statusIndicator.querySelector('.status-text').textContent = 'Disconnected';
+        
+        document.getElementById('portInfo').style.display = 'none';
+        
+        this.ui.updateStatus('Device disconnected', 'warning');
+        this.addLog('Device disconnected', 'warning');
+        
+        // Stop monitoring
+        if (this.monitoring) {
+            this.monitoring.stop();
+        }
+        if (this.frermgr) {
+            this.frermgr.stopMonitoring();
+        }
+        if (this.psfpmgr) {
+            this.psfpmgr.stopMonitoring();
         }
     }
     

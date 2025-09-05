@@ -67,6 +67,14 @@
                             <span class="material-icons">schedule</span>
                             TSN Configuration
                         </button>
+                        <button class="nav-item" data-tab="frer">
+                            <span class="material-icons">sync_alt</span>
+                            FRER (Redundancy)
+                        </button>
+                        <button class="nav-item" data-tab="psfp">
+                            <span class="material-icons">filter_alt</span>
+                            PSFP (Filtering)
+                        </button>
                         <button class="nav-item" data-tab="monitor">
                             <span class="material-icons">analytics</span>
                             Monitoring
@@ -268,6 +276,144 @@
                         <div class="card">
                             <h3>Traffic Analysis</h3>
                             <canvas id="trafficChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FRER Tab -->
+                <div class="tab-content" id="frer-tab">
+                    <div class="content-header">
+                        <h2>FRER (Frame Replication and Elimination for Reliability)</h2>
+                        <div class="frer-actions">
+                            <button class="btn btn-secondary" id="refreshFRERBtn">
+                                <span class="material-icons">refresh</span>
+                                Refresh
+                            </button>
+                            <button class="btn btn-primary" id="createStreamBtn">
+                                <span class="material-icons">add</span>
+                                Create Stream
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="frer-sections">
+                        <!-- Stream Identification -->
+                        <div class="card">
+                            <h3>Stream Identification</h3>
+                            <div class="streams-container" id="streamsContainer">
+                                <!-- Dynamically populated -->
+                            </div>
+                        </div>
+                        
+                        <!-- Sequence Recovery Functions -->
+                        <div class="card">
+                            <h3>Sequence Recovery Functions</h3>
+                            <div class="recovery-container" id="recoveryContainer">
+                                <!-- Dynamically populated -->
+                            </div>
+                            <button class="btn btn-secondary" id="createRecoveryBtn">
+                                <span class="material-icons">add</span>
+                                Add Recovery Function
+                            </button>
+                        </div>
+                        
+                        <!-- FRER Statistics -->
+                        <div class="card">
+                            <h3>FRER Statistics</h3>
+                            <div class="frer-stats" id="frerStats">
+                                <!-- Real-time statistics -->
+                            </div>
+                        </div>
+                        
+                        <!-- FRER Presets -->
+                        <div class="card">
+                            <h3>Automotive Presets</h3>
+                            <div class="preset-buttons">
+                                <button class="btn btn-outline" onclick="app.applyFRERPreset('automotive-ecu')">
+                                    ECU Protection
+                                </button>
+                                <button class="btn btn-outline" onclick="app.applyFRERPreset('gateway-redundancy')">
+                                    Gateway Redundancy
+                                </button>
+                                <button class="btn btn-outline" onclick="app.applyFRERPreset('sensor-fusion')">
+                                    Sensor Fusion
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PSFP Tab -->
+                <div class="tab-content" id="psfp-tab">
+                    <div class="content-header">
+                        <h2>PSFP (Per-Stream Filtering and Policing)</h2>
+                        <div class="psfp-actions">
+                            <button class="btn btn-secondary" id="refreshPSFPBtn">
+                                <span class="material-icons">refresh</span>
+                                Refresh
+                            </button>
+                            <button class="btn btn-primary" id="createFilterBtn">
+                                <span class="material-icons">add</span>
+                                Create Filter
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="psfp-sections">
+                        <!-- Stream Filters -->
+                        <div class="card">
+                            <h3>Stream Filters</h3>
+                            <div class="filters-container" id="filtersContainer">
+                                <!-- Dynamically populated -->
+                            </div>
+                        </div>
+                        
+                        <!-- Stream Gates -->
+                        <div class="card">
+                            <h3>Stream Gates</h3>
+                            <div class="gates-container" id="gatesContainer">
+                                <!-- Dynamically populated -->
+                            </div>
+                            <button class="btn btn-secondary" id="createGateBtn">
+                                <span class="material-icons">add</span>
+                                Add Gate
+                            </button>
+                        </div>
+                        
+                        <!-- Flow Meters -->
+                        <div class="card">
+                            <h3>Flow Meters</h3>
+                            <div class="meters-container" id="metersContainer">
+                                <!-- Dynamically populated -->
+                            </div>
+                            <button class="btn btn-secondary" id="createMeterBtn">
+                                <span class="material-icons">add</span>
+                                Add Meter
+                            </button>
+                        </div>
+                        
+                        <!-- PSFP Statistics -->
+                        <div class="card">
+                            <h3>PSFP Statistics</h3>
+                            <div class="psfp-stats" id="psfpStats">
+                                <!-- Real-time statistics -->
+                            </div>
+                        </div>
+                        
+                        <!-- PSFP Presets -->
+                        <div class="card">
+                            <h3>Industrial Presets</h3>
+                            <div class="preset-buttons">
+                                <button class="btn btn-outline" onclick="app.applyPSFPPreset('automotive-ecu')">
+                                    Automotive ECU
+                                </button>
+                                <button class="btn btn-outline" onclick="app.applyPSFPPreset('industrial-automation')">
+                                    Industrial Automation
+                                </button>
+                                <button class="btn btn-outline" onclick="app.applyPSFPPreset('avb-streaming')">
+                                    AVB Streaming
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
