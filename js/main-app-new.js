@@ -461,7 +461,7 @@ class VelocityDriveWebApp {
         const dataStr = data.toString();
         
         // Look for text patterns in the response
-        const textMatch = dataStr.match(/([\\w\\s-\\.]+)/g);
+        const textMatch = dataStr.match(/([\w\s\-\.]+)/g);
         if (textMatch) {
             result.data = textMatch.filter(text => text.trim().length > 2);
         }
