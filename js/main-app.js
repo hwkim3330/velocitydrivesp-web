@@ -1,7 +1,7 @@
 // YANG Path to SID mappings based on CT program analysis
 const YANG_PATHS = {
-    // System paths
-    '/ietf-system:system-state/platform': 19050,
+    // System paths (from CT log: 19 4A 51 = 0x4A51 = 19025)
+    '/ietf-system:system-state/platform': 0x4A51,  // 19025 (confirmed from CT)
     '/ietf-system:system/hostname': 19023,
     '/ietf-system:system/location': 19024,  
     '/ietf-system:system/contact': 19022,
@@ -290,6 +290,34 @@ class VelocityDriveApp {
             return null;
         }
     }
+    
+    parseMUP1BinaryData(data) {
+        // Parse MUP1 binary data (may contain escaped bytes)
+        const bytes = [];
+        let i = 0;
+        
+        while (i < data.length) {
+            if (data[i] === '\\' && i + 1 < data.length) {
+                if (data[i + 1] === 'x' && i + 3 < data.length) {
+                    // Hex escape: \xHH
+                    const hex = data.substring(i + 2, i + 4);
+                    bytes.push(parseInt(hex, 16));
+                    i += 4;
+                } else {
+                    // Character escape: \c
+                    const char = data[i + 1];
+                    bytes.push(char.charCodeAt(0));
+                    i += 2;
+                }
+            } else {
+                // Regular character
+                bytes.push(data.charCodeAt(i));
+                i++;
+            }
+        }
+        
+        return new Uint8Array(bytes);
+    }
 
     handleMUP1Frame(frame) {
         console.log('MUP1 Frame:', frame);
@@ -322,8 +350,10 @@ class VelocityDriveApp {
                 }
                 break;
             case 'C': // CoAP response
-                // CoAP data is binary, need to parse it
-                this.handleCoAPResponse(frame.data);
+                // CoAP data is binary in the frame
+                // Need to convert the escaped data back to binary
+                const coapBytes = this.parseMUP1BinaryData(frame.data);
+                this.handleCoAPResponse(coapBytes);
                 break;
             case 'A': // Announce
                 console.log('Device announced:', frame.data);
@@ -338,15 +368,137 @@ class VelocityDriveApp {
     
     handleCoAPResponse(data) {
         try {
-            const coap = this.coap.parseMessage(data);
-            console.log('CoAP response:', coap);
+            // Parse raw CoAP data from MUP1 'C' frame
+            // Data is already binary from the MUP1 frame
+            const bytes = typeof data === 'string' ? 
+                new TextEncoder().encode(data) : 
+                new Uint8Array(data);
             
-            if (coap.payload) {
-                // TODO: Parse CBOR payload
-                console.log('Payload (hex):', Array.from(coap.payload).map(b => b.toString(16).padStart(2, '0')).join(' '));
+            if (bytes.length < 4) {
+                console.error('CoAP response too short');
+                return;
+            }
+            
+            // Parse CoAP header
+            const version = (bytes[0] >> 6) & 0x03;
+            const type = (bytes[0] >> 4) & 0x03;
+            const tokenLength = bytes[0] & 0x0F;
+            const code = bytes[1];
+            const messageId = (bytes[2] << 8) | bytes[3];
+            
+            console.log('CoAP Response: Type:', type, 'Code:', code.toString(16), 'MID:', messageId);
+            
+            // Find payload (after 0xFF marker)
+            let payloadStart = -1;
+            for (let i = 4; i < bytes.length; i++) {
+                if (bytes[i] === 0xFF) {
+                    payloadStart = i + 1;
+                    break;
+                }
+            }
+            
+            if (payloadStart > 0 && payloadStart < bytes.length) {
+                const payload = bytes.slice(payloadStart);
+                console.log('CBOR payload:', Array.from(payload).map(b => b.toString(16).padStart(2, '0')).join(' '));
+                
+                // Parse CBOR payload
+                const decoded = this.decodeCBOR(payload);
+                console.log('Decoded YANG data:', decoded);
+                
+                // Update UI with received data
+                this.updateUIWithYANGData(decoded);
             }
         } catch (error) {
             console.error('CoAP parse error:', error);
+        }
+    }
+    
+    decodeCBOR(data) {
+        // Simple CBOR decoder for common types
+        if (!data || data.length === 0) return null;
+        
+        const majorType = (data[0] >> 5) & 0x07;
+        const additionalInfo = data[0] & 0x1F;
+        
+        switch (majorType) {
+            case 0: // Unsigned integer
+                if (additionalInfo < 24) return additionalInfo;
+                if (additionalInfo === 24) return data[1];
+                if (additionalInfo === 25) return (data[1] << 8) | data[2];
+                break;
+            case 3: // Text string
+                let length = additionalInfo;
+                let offset = 1;
+                if (additionalInfo === 24) {
+                    length = data[1];
+                    offset = 2;
+                }
+                return new TextDecoder().decode(data.slice(offset, offset + length));
+            case 5: // Map
+                // Parse indefinite map (0xBF)
+                if (data[0] === 0xBF) {
+                    const result = {};
+                    let pos = 1;
+                    while (pos < data.length && data[pos] !== 0xFF) {
+                        // Parse key (usually SID)
+                        const key = this.decodeCBOR(data.slice(pos));
+                        pos += this.getCBORLength(data.slice(pos));
+                        
+                        // Parse value
+                        const value = this.decodeCBOR(data.slice(pos));
+                        pos += this.getCBORLength(data.slice(pos));
+                        
+                        result[key] = value;
+                    }
+                    return result;
+                }
+                break;
+            case 7: // Simple values
+                if (additionalInfo === 20) return false;
+                if (additionalInfo === 21) return true;
+                if (additionalInfo === 22) return null;
+                break;
+        }
+        
+        return data; // Return raw data if can't decode
+    }
+    
+    getCBORLength(data) {
+        const majorType = (data[0] >> 5) & 0x07;
+        const additionalInfo = data[0] & 0x1F;
+        
+        let headerLength = 1;
+        let dataLength = 0;
+        
+        if (additionalInfo < 24) {
+            dataLength = additionalInfo;
+        } else if (additionalInfo === 24) {
+            headerLength = 2;
+            dataLength = data[1];
+        } else if (additionalInfo === 25) {
+            headerLength = 3;
+            dataLength = (data[1] << 8) | data[2];
+        }
+        
+        if (majorType === 3 || majorType === 2) { // Text or byte string
+            return headerLength + dataLength;
+        }
+        
+        return headerLength;
+    }
+    
+    updateUIWithYANGData(data) {
+        // Update UI based on received YANG data
+        if (data && typeof data === 'object') {
+            // Check for platform data (SID 19050)
+            if (data[19050]) {
+                document.getElementById('platform').textContent = data[19050];
+            }
+            // Check for hostname (SID 19023)
+            if (data[19023]) {
+                document.getElementById('hostname').textContent = data[19023];
+            }
+            // Add more mappings as needed
         }
     }
 
@@ -376,8 +528,8 @@ class VelocityDriveApp {
                 await this.serial.write(new TextDecoder().decode(pingFrame));
             }
             
-            // Get system information via CoAP
-            await this.getYANGData('/ietf-system:system-state/platform');
+            // Get system information via CoAP (don't send duplicate requests)
+            // await this.getYANGData('/ietf-system:system-state/platform');
             
             // Fallback
             setTimeout(() => {
@@ -395,68 +547,204 @@ class VelocityDriveApp {
     }
     
     async getYANGData(path) {
-        if (!this.isConnected || !this.mup1 || !this.coap) {
+        if (!this.isConnected || !this.mup1 || !this.coap || !this.serial) {
             console.error('Not connected');
             return;
         }
         
         try {
-            const sid = YANG_PATHS[path];
-            if (!sid) {
-                console.error('Unknown YANG path:', path);
-                return;
-            }
+            const sid = YANG_PATHS[path] || path; // Allow direct SID if path not found
             
-            // Build CoAP FETCH request with SID
-            const coapMessage = this.coap.buildMessage({
-                type: this.coap.TYPE_CON,
-                code: this.coap.CODE_FETCH,
-                messageId: this.coap.getNextMessageId(),
-                contentFormat: this.coap.FORMAT_YANG_IDENTIFIERS_CBOR,
-                accept: this.coap.FORMAT_YANG_INSTANCES_CBOR,
-                payload: this.encodeCBOR({sid: sid})
-            });
+            // Build CoAP FETCH request exactly like CT
+            // Format: 40 05 00 03 B1 63 11 8D 33 64 3D 61 21 8E 61 04 FF [CBOR]
+            const messageId = this.coap.getNextMessageId();
             
-            // Wrap in MUP1 frame
-            const mup1Frame = this.mup1.buildFrame('c', coapMessage);
+            // Build CoAP header
+            const header = new Uint8Array([
+                0x40, // Ver=1, Type=CON(0), TKL=0
+                0x05, // Code=FETCH (0.05)
+                (messageId >> 8) & 0xFF,
+                messageId & 0xFF
+            ]);
             
-            console.log('Sending YANG GET for', path, 'SID:', sid);
-            await this.serial.write(new TextDecoder().decode(mup1Frame));
+            // Build options (from CT: B1 63 11 8D 33 64 3D 61 21 8E 61 04)
+            const options = new Uint8Array([
+                0xB1, 0x63, // URI-Path: "c"
+                0x11, 0x8D, // Content-Format: 141 (yang-identifiers+cbor-seq)
+                0x33, 0x64, 0x3D, 0x61, // URI-Query: "d=a"
+                0x21, 0x8E, // Accept: 142 (yang-instances+cbor-seq)
+                0x61, 0x04  // Block2: 2:0/0/256
+            ]);
+            
+            // Build CBOR payload (just the SID)
+            const payload = this.encodeSID(sid);
+            
+            // Combine all parts
+            const coapMessage = new Uint8Array([
+                ...header,
+                ...options,
+                0xFF, // Payload marker
+                ...payload
+            ]);
+            
+            // Wrap in MUP1 'c' frame
+            const mup1Frame = this.buildMUP1CoAPFrame(coapMessage);
+            
+            console.log('Sending CoAP FETCH for', path, 'SID:', sid);
+            console.log('CoAP bytes:', Array.from(coapMessage).map(b => b.toString(16).padStart(2, '0')).join(' '));
+            
+            await this.serial.write(mup1Frame);
         } catch (error) {
             console.error('Failed to get YANG data:', error);
         }
     }
     
+    encodeSID(sid) {
+        // CBOR encoding of SID (major type 0 = unsigned int)
+        if (sid < 24) {
+            return new Uint8Array([sid]);
+        } else if (sid < 256) {
+            return new Uint8Array([0x18, sid]);
+        } else if (sid < 65536) {
+            return new Uint8Array([0x19, (sid >> 8) & 0xFF, sid & 0xFF]);
+        } else {
+            return new Uint8Array([0x1A, (sid >> 24) & 0xFF, (sid >> 16) & 0xFF, (sid >> 8) & 0xFF, sid & 0xFF]);
+        }
+    }
+    
+    buildMUP1CoAPFrame(coapData) {
+        // Build MUP1 frame: >c[binary_data]<checksum\n
+        let frame = '>c[';
+        
+        // Add CoAP data as escaped binary
+        for (let i = 0; i < coapData.length; i++) {
+            const byte = coapData[i];
+            // Escape special MUP1 characters
+            if (byte === 0x5B || byte === 0x5D || byte === 0x3E || byte === 0x3C || byte === 0x5C) {
+                frame += '\\x' + byte.toString(16).padStart(2, '0');
+            } else if (byte >= 32 && byte <= 126) {
+                frame += String.fromCharCode(byte);
+            } else {
+                frame += '\\x' + byte.toString(16).padStart(2, '0');
+            }
+        }
+        
+        frame += ']<';
+        
+        // Calculate checksum
+        const checksum = this.calculateMUP1Checksum(frame + '<');
+        frame += checksum + '\n';
+        
+        return frame;
+    }
+    
+    calculateMUP1Checksum(data) {
+        // 16-bit one's complement checksum
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) {
+            sum += data.charCodeAt(i);
+        }
+        
+        // Handle overflow
+        while (sum >> 16) {
+            sum = (sum & 0xFFFF) + (sum >> 16);
+        }
+        
+        // One's complement
+        sum = ~sum & 0xFFFF;
+        
+        return sum.toString(16).toUpperCase().padStart(4, '0');
+    }
+    
     async setYANGData(path, value) {
-        if (!this.isConnected || !this.mup1 || !this.coap) {
+        if (!this.isConnected || !this.mup1 || !this.coap || !this.serial) {
             console.error('Not connected');
             return;
         }
         
         try {
-            const sid = YANG_PATHS[path];
-            if (!sid) {
-                console.error('Unknown YANG path:', path);
-                return;
-            }
+            const sid = YANG_PATHS[path] || path;
             
-            // Build CoAP PUT request with SID and value
-            const coapMessage = this.coap.buildMessage({
-                type: this.coap.TYPE_CON,
-                code: this.coap.CODE_PUT,
-                messageId: this.coap.getNextMessageId(),
-                contentFormat: this.coap.FORMAT_YANG_INSTANCES_CBOR,
-                payload: this.encodeCBOR({sid: sid, value: value})
-            });
+            // Build CoAP iPATCH request for setting data
+            // iPATCH = 0.07 (code 7)
+            const messageId = this.coap.getNextMessageId();
             
-            // Wrap in MUP1 frame
-            const mup1Frame = this.mup1.buildFrame('c', coapMessage);
+            // Build CoAP header
+            const header = new Uint8Array([
+                0x40, // Ver=1, Type=CON(0), TKL=0
+                0x07, // Code=iPATCH (0.07)
+                (messageId >> 8) & 0xFF,
+                messageId & 0xFF
+            ]);
             
-            console.log('Sending YANG SET for', path, 'SID:', sid, 'Value:', value);
-            await this.serial.write(new TextDecoder().decode(mup1Frame));
+            // Build options
+            const options = new Uint8Array([
+                0xB1, 0x63, // URI-Path: "c"
+                0x11, 0x8E, // Content-Format: 142 (yang-instances+cbor-seq)
+                0x33, 0x64, 0x3D, 0x61 // URI-Query: "d=a"
+            ]);
+            
+            // Build CBOR payload (SID + value)
+            const payload = this.encodeSIDValue(sid, value);
+            
+            // Combine all parts
+            const coapMessage = new Uint8Array([
+                ...header,
+                ...options,
+                0xFF, // Payload marker
+                ...payload
+            ]);
+            
+            // Wrap in MUP1 'c' frame
+            const mup1Frame = this.buildMUP1CoAPFrame(coapMessage);
+            
+            console.log('Sending CoAP iPATCH for', path, 'SID:', sid, 'Value:', value);
+            console.log('CoAP bytes:', Array.from(coapMessage).map(b => b.toString(16).padStart(2, '0')).join(' '));
+            
+            await this.serial.write(mup1Frame);
         } catch (error) {
             console.error('Failed to set YANG data:', error);
         }
+    }
+    
+    encodeSIDValue(sid, value) {
+        // CBOR encoding of {sid: value} as a map
+        const result = [];
+        
+        // Map with 1 item (0xA1 = map of size 1)
+        result.push(0xA1);
+        
+        // Encode SID as key
+        if (sid < 24) {
+            result.push(sid);
+        } else if (sid < 256) {
+            result.push(0x18, sid);
+        } else if (sid < 65536) {
+            result.push(0x19, (sid >> 8) & 0xFF, sid & 0xFF);
+        }
+        
+        // Encode value
+        if (typeof value === 'string') {
+            const bytes = new TextEncoder().encode(value);
+            if (bytes.length < 24) {
+                result.push(0x60 | bytes.length); // Text string
+            } else if (bytes.length < 256) {
+                result.push(0x78, bytes.length);
+            }
+            result.push(...bytes);
+        } else if (typeof value === 'number') {
+            if (value < 24) {
+                result.push(value);
+            } else if (value < 256) {
+                result.push(0x18, value);
+            } else if (value < 65536) {
+                result.push(0x19, (value >> 8) & 0xFF, value & 0xFF);
+            }
+        } else if (typeof value === 'boolean') {
+            result.push(value ? 0xF5 : 0xF4);
+        }
+        
+        return new Uint8Array(result);
     }
     
     // Simple CBOR encoder for basic types
