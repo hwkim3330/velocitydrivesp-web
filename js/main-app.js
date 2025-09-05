@@ -348,6 +348,12 @@ class VelocityDriveApp {
                     statusIndicator.querySelector('.status-text').textContent = 'Connected';
                     statusIndicator.classList.add('connected');
                 }
+                
+                // After PONG, proceed to get catalog (like CT)
+                if (this.waitingForPong) {
+                    this.waitingForPong = false;
+                    this.afterPongReceived();
+                }
                 break;
             case 'C': // CoAP response
                 // CoAP data is binary in the frame
@@ -490,15 +496,39 @@ class VelocityDriveApp {
     updateUIWithYANGData(data) {
         // Update UI based on received YANG data
         if (data && typeof data === 'object') {
-            // Check for platform data (SID 19050)
-            if (data[19050]) {
-                document.getElementById('platform').textContent = data[19050];
+            // Check if this is catalog response (SID 0x7278 = 29304)
+            if (data[0x7278]) {
+                console.log('YANG Catalog checksum:', data[0x7278]);
+                this.yangCatalog = data[0x7278];
+                
+                if (this.waitingForCatalog) {
+                    this.waitingForCatalog = false;
+                    this.afterCatalogReceived();
+                }
             }
+            
+            // Check for platform data (SID 0x4A51 = 19025)
+            if (data[0x4A51]) {
+                const elem = document.getElementById('platform');
+                if (elem) elem.textContent = data[0x4A51];
+            }
+            
             // Check for hostname (SID 19023)
             if (data[19023]) {
-                document.getElementById('hostname').textContent = data[19023];
+                const elem = document.getElementById('hostname');
+                if (elem) elem.textContent = data[19023];
             }
-            // Add more mappings as needed
+            
+            // Check for nested data structures
+            for (const key in data) {
+                if (typeof data[key] === 'object' && data[key] !== null) {
+                    // Handle nested CBOR structures
+                    this.updateUIWithYANGData(data[key]);
+                }
+            }
+        } else if (typeof data === 'string') {
+            // Direct string value (like platform)
+            console.log('Received string data:', data);
         }
     }
 
@@ -521,29 +551,71 @@ class VelocityDriveApp {
         try {
             this.currentCommand = 'system-info';
             
-            // Send MUP1 ping
+            // Send MUP1 ping first
             if (this.mup1 && this.serial) {
                 const pingFrame = this.mup1.buildFrame('p');
                 console.log('Sending ping:', new TextDecoder().decode(pingFrame));
                 await this.serial.write(new TextDecoder().decode(pingFrame));
+                
+                // Wait for ping response
+                this.waitingForPong = true;
             }
-            
-            // Get system information via CoAP (don't send duplicate requests)
-            // await this.getYANGData('/ietf-system:system-state/platform');
-            
-            // Fallback
-            setTimeout(() => {
-                if (this.isConnected && !this.deviceInfo) {
-                    this.updateSystemInfo({
-                        status: 'Connected',
-                        port: 'Serial Port',
-                        baudRate: '115200'
-                    });
-                }
-            }, 2000);
         } catch (error) {
             console.error('Failed to get device info:', error);
         }
+    }
+    
+    async afterPongReceived() {
+        // After PONG, send first CoAP FETCH for catalog checksum (like CT)
+        console.log('PONG received, requesting YANG catalog checksum...');
+        
+        // First request: Get catalog checksum (SID 0x7278)
+        await this.getYANGCatalog();
+    }
+    
+    async getYANGCatalog() {
+        // Send CoAP FETCH for catalog checksum (SID 0x7278 = 29304)
+        // Payload: 81 19 72 78 (CBOR: {1: 0x7278})
+        const messageId = this.coap.getNextMessageId();
+        
+        const header = new Uint8Array([
+            0x40, // Ver=1, Type=CON(0), TKL=0
+            0x05, // Code=FETCH (0.05)
+            (messageId >> 8) & 0xFF,
+            messageId & 0xFF
+        ]);
+        
+        const options = new Uint8Array([
+            0xB1, 0x63, // URI-Path: "c"
+            0x11, 0x8D, // Content-Format: 141
+            0x33, 0x64, 0x3D, 0x61, // URI-Query: "d=a"
+            0x21, 0x8E // Accept: 142
+        ]);
+        
+        // Payload: map with key 1 and value 0x7278
+        const payload = new Uint8Array([0x81, 0x19, 0x72, 0x78]);
+        
+        const coapMessage = new Uint8Array([
+            ...header,
+            ...options,
+            0xFF, // Payload marker
+            ...payload
+        ]);
+        
+        const mup1Frame = this.buildMUP1CoAPFrame(coapMessage);
+        console.log('Requesting catalog checksum...');
+        await this.serial.write(mup1Frame);
+        
+        // Store that we're waiting for catalog
+        this.waitingForCatalog = true;
+    }
+    
+    async afterCatalogReceived() {
+        // After catalog checksum, get platform info (like CT)
+        console.log('Catalog received, getting platform info...');
+        
+        // Second request: Get platform (SID 0x4A51)
+        await this.getYANGData('/ietf-system:system-state/platform');
     }
     
     async getYANGData(path) {
@@ -794,10 +866,15 @@ class VelocityDriveApp {
         }
         
         try {
-            await this.getYANGData('/ietf-system:system-state/platform');
-            await this.getYANGData('/ietf-system:system/hostname');
-            await this.getYANGData('/ietf-system:system-state/clock/current-datetime');
             this.showStatus('Refreshing system information...', 'info');
+            
+            // Get various system info
+            await this.getYANGData(0x4A50); // /ietf-system:system-state/platform/os-name
+            await this.getYANGData(0x4A51); // /ietf-system:system-state/platform/machine  
+            await this.getYANGData(0x4A52); // /ietf-system:system-state/platform/os-version
+            await this.getYANGData(19023);  // /ietf-system:system/hostname
+            await this.getYANGData(19024);  // /ietf-system:system/location
+            await this.getYANGData(19022);  // /ietf-system:system/contact
         } catch (error) {
             this.showError('Failed to refresh system info');
         }
@@ -810,11 +887,75 @@ class VelocityDriveApp {
         }
         
         try {
-            await this.getYANGData('/ietf-interfaces:interfaces');
             this.showStatus('Refreshing interfaces...', 'info');
+            
+            // Get interface list
+            await this.getYANGData(1000); // /ietf-interfaces:interfaces
+            await this.getYANGData(1020); // /ietf-interfaces:interfaces-state
         } catch (error) {
             this.showError('Failed to refresh interfaces');
         }
+    }
+    
+    async setBridgeAgeingTime() {
+        const value = document.getElementById('bridgeAgeingTime').value;
+        if (value) {
+            await this.setYANGData(20025, parseInt(value)); // Bridge ageing-time
+            this.showStatus('Bridge ageing time updated', 'success');
+        }
+    }
+    
+    async setBridgeLearning() {
+        const disabled = document.getElementById('bridgeLearningDisable').checked;
+        await this.setYANGData(30007, disabled); // mchp-velocitysp-bridge:fdb-learning-disable
+        this.showStatus('Bridge learning setting updated', 'success');
+    }
+    
+    async flushFDB() {
+        await this.setYANGData(30001, true); // mchp-velocitysp-bridge:fdb-flush
+        this.showStatus('FDB flushed', 'success');
+    }
+    
+    async setLLDPEnabled() {
+        const enabled = document.getElementById('lldpEnabled').checked;
+        await this.setYANGData(21001, enabled); // ieee802-dot1ab-lldp:lldp/enabled
+        this.showStatus('LLDP setting updated', 'success');
+    }
+    
+    async setLLDPInterval() {
+        const interval = document.getElementById('lldpTxInterval').value;
+        if (interval) {
+            await this.setYANGData(21002, parseInt(interval)); // lldp tx-interval
+            this.showStatus('LLDP TX interval updated', 'success');
+        }
+    }
+    
+    async setLLDPHold() {
+        const hold = document.getElementById('lldpTxHold').value;
+        if (hold) {
+            await this.setYANGData(21003, parseInt(hold)); // lldp tx-hold
+            this.showStatus('LLDP TX hold updated', 'success');
+        }
+    }
+    
+    async applyPTPConfig() {
+        const domain = document.getElementById('ptpDomainNumber').value;
+        const priority1 = document.getElementById('ptpPriority1').value;
+        const priority2 = document.getElementById('ptpPriority2').value;
+        const clockClass = document.getElementById('ptpClockClass').value;
+        
+        if (domain) await this.setYANGData(22011, parseInt(domain)); // PTP domain
+        if (priority1) await this.setYANGData(22012, parseInt(priority1)); // PTP priority1
+        if (priority2) await this.setYANGData(22013, parseInt(priority2)); // PTP priority2
+        if (clockClass) await this.setYANGData(22014, parseInt(clockClass)); // PTP clock-class
+        
+        this.showStatus('PTP configuration applied', 'success');
+    }
+    
+    async addStreamIdentity() {
+        // Open modal for stream identity configuration
+        this.showStatus('Stream identity configuration...', 'info');
+        // TODO: Implement modal dialog
     }
     
     async applyCBS() {
