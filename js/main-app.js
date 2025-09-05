@@ -1,15 +1,3 @@
-// Load protocol modules
-if (!window.MUP1Protocol) {
-    const script1 = document.createElement('script');
-    script1.src = 'js/mup1-protocol.js';
-    document.head.appendChild(script1);
-}
-if (!window.CoAPProtocol) {
-    const script2 = document.createElement('script');
-    script2.src = 'js/coap-protocol.js';
-    document.head.appendChild(script2);
-}
-
 // YANG Path to SID mappings based on CT program analysis
 const YANG_PATHS = {
     // System paths
