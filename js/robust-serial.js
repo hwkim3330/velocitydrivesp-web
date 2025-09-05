@@ -10,7 +10,16 @@ class RobustSerialController {
 
     async requestPort() {
         try {
-            // Request port with filters for common Microchip devices
+            // First, check if we already have ports available
+            const ports = await navigator.serial.getPorts();
+            if (ports.length > 0) {
+                console.log(`Found ${ports.length} existing port(s), using first one`);
+                this.port = ports[0];
+                return true;
+            }
+            
+            // Request new port with filters for common Microchip devices
+            console.log('Requesting new serial port from user...');
             this.port = await navigator.serial.requestPort({
                 filters: [
                     { usbVendorId: 0x04D8 }, // Microchip
@@ -20,9 +29,12 @@ class RobustSerialController {
                     { usbVendorId: 0x1A86 }  // QinHeng
                 ]
             });
+            console.log('Port selected by user');
             return true;
         } catch (e) {
-            if (e.name !== 'NotFoundError') {
+            if (e.name === 'NotFoundError') {
+                console.log('No port selected by user');
+            } else {
                 console.error('Port request failed:', e);
             }
             return false;
@@ -54,7 +66,8 @@ class RobustSerialController {
                 
                 // Ensure port is closed before opening
                 if (this.port.readable || this.port.writable) {
-                    await this.port.close();
+                    console.log('Port is already open, closing first...');
+                    await this.port.close().catch(e => console.log('Close error (ignored):', e));
                     await new Promise(r => setTimeout(r, 500));
                 }
 
@@ -81,11 +94,18 @@ class RobustSerialController {
                 return true;
             } catch (error) {
                 console.error(`Failed to open port:`, error);
+                
+                // Check specific error messages
+                if (error.message && error.message.includes('Failed to open serial port')) {
+                    console.log('Port may be in use by another application.');
+                    console.log('Please close any other serial terminal programs and try again.');
+                }
+                
                 retries--;
                 
                 if (retries > 0) {
-                    console.log(`Retrying in 1 second...`);
-                    await new Promise(r => setTimeout(r, 1000));
+                    console.log(`Retrying in 2 seconds...`);
+                    await new Promise(r => setTimeout(r, 2000));
                 } else {
                     // Try alternative approach - direct binary streams
                     try {
@@ -94,6 +114,14 @@ class RobustSerialController {
                         return true;
                     } catch (altError) {
                         console.error('Alternative method also failed:', altError);
+                        
+                        // Provide helpful error message
+                        if (altError.message && altError.message.includes('Failed to open serial port')) {
+                            throw new Error('Serial port is unavailable. Please ensure:\n' +
+                                '1. No other application is using the port\n' +
+                                '2. The device is connected\n' +
+                                '3. You have granted permission when prompted');
+                        }
                         throw error;
                     }
                 }
