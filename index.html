@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .connected { background-color: #4CAF50 !important; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .status.info { background: #2196F3; color: white; }
+        .status.success { background: #4CAF50; color: white; }
+        .status.error { background: #f44336; color: white; }
+        .info-item { padding: 5px 0; }
+        .info-label { font-weight: bold; margin-right: 10px; }
+    </style>
 </head>
 <body>
     <div class="app-container">
@@ -20,11 +29,7 @@
                 <div class="header-actions">
                     <button id="connectBtn" class="btn btn-primary">
                         <span class="material-icons">usb</span>
-                        Connect Serial
-                    </button>
-                    <button id="disconnectBtn" class="btn btn-danger" style="display:none;">
-                        <span class="material-icons">usb_off</span>
-                        Disconnect
+                        <span id="connectBtnText">Connect</span>
                     </button>
                 </div>
             </div>
@@ -472,8 +477,14 @@
         </div>
     </div>
 
+    <!-- Status Display -->
+    <div id="status" class="status" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;"></div>
+    
+    <!-- Device Info Container -->
+    <div id="device-info" style="position: fixed; top: 80px; right: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); min-width: 200px; display: none;"></div>
+    
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="module" src="js/simple-app.js"></script>
+    <script src="js/robust-serial.js"></script>
+    <script src="js/main-app.js"></script>
 </body>
 </html>
