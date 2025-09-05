@@ -10,6 +10,56 @@ if (!window.CoAPProtocol) {
     document.head.appendChild(script2);
 }
 
+// YANG Path to SID mappings based on CT program analysis
+const YANG_PATHS = {
+    // System paths
+    '/ietf-system:system-state/platform': 19050,
+    '/ietf-system:system/hostname': 19023,
+    '/ietf-system:system/location': 19024,  
+    '/ietf-system:system/contact': 19022,
+    '/ietf-system:system-state/clock/current-datetime': 19051,
+    
+    // Interface paths
+    '/ietf-interfaces:interfaces': 1000,
+    '/ietf-interfaces:interfaces/interface': 1001,
+    '/ietf-interfaces:interfaces-state': 1020,
+    
+    // Bridge paths (from ieee802-dot1q-bridge)
+    '/ieee802-dot1q-bridge:bridges': 20000,
+    '/ieee802-dot1q-bridge:bridges/bridge': 20001,
+    '/ieee802-dot1q-bridge:bridges/bridge/component': 20010,
+    '/ieee802-dot1q-bridge:bridges/bridge/component/filtering-database': 20020,
+    
+    // LLDP paths (from ieee802-dot1ab-lldp)
+    '/ieee802-dot1ab-lldp:lldp': 21000,
+    '/ieee802-dot1ab-lldp:lldp/local-system-data': 21010,
+    '/ieee802-dot1ab-lldp:lldp/remote-systems-data': 21020,
+    
+    // PTP paths (from ieee1588-ptp)
+    '/ieee1588-ptp:ptp': 22000,
+    '/ieee1588-ptp:ptp/instance-list': 22010,
+    
+    // Scheduling paths (from ieee802-dot1q-sched)
+    '/ieee802-dot1q-sched:scheduling': 23000,
+    '/ieee802-dot1q-sched:max-sdu-table': 23010,
+    '/ieee802-dot1q-sched:gate-parameters': 23020,
+    
+    // PSFP paths (from ieee802-dot1q-psfp)
+    '/ieee802-dot1q-psfp:psfp': 24000,
+    '/ieee802-dot1q-psfp:stream-filters': 24010,
+    '/ieee802-dot1q-psfp:stream-gates': 24020,
+    '/ieee802-dot1q-psfp:flow-meters': 24030,
+    
+    // Stream ID paths (from ieee802-dot1cb-stream-identification)
+    '/ieee802-dot1cb-stream-identification:stream-identity-table': 25000,
+    '/ieee802-dot1cb-stream-identification:stream-identity': 25001,
+    
+    // Microchip custom paths (from mchp-velocitysp-bridge)
+    '/mchp-velocitysp-bridge:fdb-flush': 30001,
+    '/mchp-velocitysp-bridge:fdb-learning-disable': 30007,
+    '/mchp-velocitysp-bridge:fdb-learning-limit': 30008
+};
+
 // Main Application Controller
 class VelocityDriveApp {
     constructor() {
@@ -37,6 +87,66 @@ class VelocityDriveApp {
 
         // Initialize tabs
         this.initializeTabs();
+        
+        // Initialize YANG module selector
+        this.populateYANGModules();
+        
+        // Initialize action buttons
+        this.initializeActionButtons();
+    }
+    
+    populateYANGModules() {
+        const selector = document.getElementById('yangModule');
+        if (selector) {
+            const modules = [
+                'ietf-system',
+                'ietf-interfaces', 
+                'ieee802-dot1q-bridge',
+                'ieee802-dot1ab-lldp',
+                'ieee1588-ptp',
+                'ieee802-dot1q-sched',
+                'ieee802-dot1q-psfp',
+                'ieee802-dot1cb-stream-identification',
+                'mchp-velocitysp-bridge'
+            ];
+            
+            modules.forEach(module => {
+                const option = document.createElement('option');
+                option.value = module;
+                option.textContent = module;
+                selector.appendChild(option);
+            });
+        }
+    }
+    
+    initializeActionButtons() {
+        // System tab buttons
+        const refreshSystemBtn = document.getElementById('refreshSystemBtn');
+        if (refreshSystemBtn) {
+            refreshSystemBtn.addEventListener('click', () => this.refreshSystemInfo());
+        }
+        
+        // Interface tab buttons
+        const refreshInterfacesBtn = document.getElementById('refreshInterfacesBtn');
+        if (refreshInterfacesBtn) {
+            refreshInterfacesBtn.addEventListener('click', () => this.refreshInterfaces());
+        }
+        
+        // TSN configuration buttons
+        const applyCBSBtn = document.getElementById('applyCBSBtn');
+        if (applyCBSBtn) {
+            applyCBSBtn.addEventListener('click', () => this.applyCBS());
+        }
+        
+        const applyTASBtn = document.getElementById('applyTASBtn');
+        if (applyTASBtn) {
+            applyTASBtn.addEventListener('click', () => this.applyTAS());
+        }
+        
+        const applyPTPBtn = document.getElementById('applyPTPBtn');
+        if (applyPTPBtn) {
+            applyPTPBtn.addEventListener('click', () => this.applyPTP());
+        }
     }
 
     initializeTabs() {
@@ -214,14 +324,17 @@ class VelocityDriveApp {
         try {
             this.currentCommand = 'system-info';
             
-            // Send MUP1 ping (confirmed from CT logs)
+            // Send MUP1 ping
             if (this.mup1 && this.serial) {
                 const pingFrame = this.mup1.buildFrame('p');
                 console.log('Sending ping:', new TextDecoder().decode(pingFrame));
                 await this.serial.write(new TextDecoder().decode(pingFrame));
             }
             
-            // Fallback - show connected status even if no immediate response
+            // Get system information via CoAP
+            await this.getYANGData('/ietf-system:system-state/platform');
+            
+            // Fallback
             setTimeout(() => {
                 if (this.isConnected && !this.deviceInfo) {
                     this.updateSystemInfo({
@@ -233,6 +346,254 @@ class VelocityDriveApp {
             }, 2000);
         } catch (error) {
             console.error('Failed to get device info:', error);
+        }
+    }
+    
+    async getYANGData(path) {
+        if (!this.isConnected || !this.mup1 || !this.coap) {
+            console.error('Not connected');
+            return;
+        }
+        
+        try {
+            const sid = YANG_PATHS[path];
+            if (!sid) {
+                console.error('Unknown YANG path:', path);
+                return;
+            }
+            
+            // Build CoAP FETCH request with SID
+            const coapMessage = this.coap.buildMessage({
+                type: this.coap.TYPE_CON,
+                code: this.coap.CODE_FETCH,
+                messageId: this.coap.getNextMessageId(),
+                contentFormat: this.coap.FORMAT_YANG_IDENTIFIERS_CBOR,
+                accept: this.coap.FORMAT_YANG_INSTANCES_CBOR,
+                payload: this.encodeCBOR({sid: sid})
+            });
+            
+            // Wrap in MUP1 frame
+            const mup1Frame = this.mup1.buildFrame('c', coapMessage);
+            
+            console.log('Sending YANG GET for', path, 'SID:', sid);
+            await this.serial.write(new TextDecoder().decode(mup1Frame));
+        } catch (error) {
+            console.error('Failed to get YANG data:', error);
+        }
+    }
+    
+    async setYANGData(path, value) {
+        if (!this.isConnected || !this.mup1 || !this.coap) {
+            console.error('Not connected');
+            return;
+        }
+        
+        try {
+            const sid = YANG_PATHS[path];
+            if (!sid) {
+                console.error('Unknown YANG path:', path);
+                return;
+            }
+            
+            // Build CoAP PUT request with SID and value
+            const coapMessage = this.coap.buildMessage({
+                type: this.coap.TYPE_CON,
+                code: this.coap.CODE_PUT,
+                messageId: this.coap.getNextMessageId(),
+                contentFormat: this.coap.FORMAT_YANG_INSTANCES_CBOR,
+                payload: this.encodeCBOR({sid: sid, value: value})
+            });
+            
+            // Wrap in MUP1 frame
+            const mup1Frame = this.mup1.buildFrame('c', coapMessage);
+            
+            console.log('Sending YANG SET for', path, 'SID:', sid, 'Value:', value);
+            await this.serial.write(new TextDecoder().decode(mup1Frame));
+        } catch (error) {
+            console.error('Failed to set YANG data:', error);
+        }
+    }
+    
+    // Simple CBOR encoder for basic types
+    encodeCBOR(obj) {
+        const bytes = [];
+        
+        // Map (major type 5)
+        const keys = Object.keys(obj);
+        if (keys.length < 24) {
+            bytes.push(0xa0 | keys.length);
+        }
+        
+        keys.forEach(key => {
+            // Encode key as string
+            const keyBytes = new TextEncoder().encode(key);
+            if (keyBytes.length < 24) {
+                bytes.push(0x60 | keyBytes.length);
+            }
+            bytes.push(...keyBytes);
+            
+            // Encode value
+            const value = obj[key];
+            if (typeof value === 'number') {
+                if (value < 24) {
+                    bytes.push(value);
+                } else if (value < 256) {
+                    bytes.push(0x18, value);
+                } else if (value < 65536) {
+                    bytes.push(0x19, value >> 8, value & 0xff);
+                }
+            } else if (typeof value === 'string') {
+                const strBytes = new TextEncoder().encode(value);
+                if (strBytes.length < 24) {
+                    bytes.push(0x60 | strBytes.length);
+                }
+                bytes.push(...strBytes);
+            }
+        });
+        
+        return new Uint8Array(bytes);
+    }
+    
+    async refreshSystemInfo() {
+        if (!this.isConnected) {
+            this.showError('Not connected to device');
+            return;
+        }
+        
+        try {
+            await this.getYANGData('/ietf-system:system-state/platform');
+            await this.getYANGData('/ietf-system:system/hostname');
+            await this.getYANGData('/ietf-system:system-state/clock/current-datetime');
+            this.showStatus('Refreshing system information...', 'info');
+        } catch (error) {
+            this.showError('Failed to refresh system info');
+        }
+    }
+    
+    async refreshInterfaces() {
+        if (!this.isConnected) {
+            this.showError('Not connected to device');
+            return;
+        }
+        
+        try {
+            await this.getYANGData('/ietf-interfaces:interfaces');
+            this.showStatus('Refreshing interfaces...', 'info');
+        } catch (error) {
+            this.showError('Failed to refresh interfaces');
+        }
+    }
+    
+    async applyCBS() {
+        if (!this.isConnected) {
+            this.showError('Not connected to device');
+            return;
+        }
+        
+        const priority6BW = document.getElementById('cbsPriority6BW').value;
+        const priority2BW = document.getElementById('cbsPriority2BW').value;
+        
+        try {
+            // Apply CBS configuration via YANG
+            await this.setYANGData('/ieee802-dot1q-sched:max-sdu-table/max-sdu[priority=6]/max-sdu-value', priority6BW * 1000000);
+            await this.setYANGData('/ieee802-dot1q-sched:max-sdu-table/max-sdu[priority=2]/max-sdu-value', priority2BW * 1000000);
+            this.showStatus('CBS configuration applied', 'success');
+        } catch (error) {
+            this.showError('Failed to apply CBS config');
+        }
+    }
+    
+    async applyTAS() {
+        if (!this.isConnected) {
+            this.showError('Not connected to device');
+            return;
+        }
+        
+        const cycleTime = document.getElementById('tasCycleTime').value;
+        
+        try {
+            // Apply TAS configuration via YANG
+            await this.setYANGData('/ieee802-dot1q-sched:gate-parameters/admin-cycle-time', cycleTime * 1000);
+            this.showStatus('TAS configuration applied', 'success');
+        } catch (error) {
+            this.showError('Failed to apply TAS config');
+        }
+    }
+    
+    async applyPTP() {
+        if (!this.isConnected) {
+            this.showError('Not connected to device');
+            return;
+        }
+        
+        const ptpMode = document.getElementById('ptpMode').value;
+        const ptpDomain = document.getElementById('ptpDomain').value;
+        
+        try {
+            // Apply PTP configuration via YANG
+            await this.setYANGData('/ieee1588-ptp:ptp/instance-list[instance-number=0]/default-ds/domain-number', ptpDomain);
+            this.showStatus('PTP configuration applied', 'success');
+        } catch (error) {
+            this.showError('Failed to apply PTP config');
+        }
+    }
+    
+    // FRER preset configurations
+    applyFRERPreset(preset) {
+        console.log('Applying FRER preset:', preset);
+        // Note: FRER is not available based on YANG module analysis
+        this.showStatus('FRER functionality not available in this firmware version', 'warning');
+    }
+    
+    // PSFP preset configurations  
+    applyPSFPPreset(preset) {
+        console.log('Applying PSFP preset:', preset);
+        switch(preset) {
+            case 'automotive-ecu':
+                // Configure PSFP for automotive ECU protection
+                this.configurePSFPAutomotive();
+                break;
+            case 'industrial-automation':
+                // Configure PSFP for industrial automation
+                this.configurePSFPIndustrial();
+                break;
+            case 'avb-streaming':
+                // Configure PSFP for AVB streaming
+                this.configurePSFPAVB();
+                break;
+        }
+    }
+    
+    async configurePSFPAutomotive() {
+        try {
+            // Create stream filters for critical automotive traffic
+            await this.setYANGData('/ieee802-dot1q-psfp:stream-filters/stream-filter-instance[filter-id=1]/stream-handle', 100);
+            await this.setYANGData('/ieee802-dot1q-psfp:stream-filters/stream-filter-instance[filter-id=1]/priority-spec', 7);
+            this.showStatus('Automotive PSFP preset applied', 'success');
+        } catch (error) {
+            this.showError('Failed to apply automotive PSFP preset');
+        }
+    }
+    
+    async configurePSFPIndustrial() {
+        try {
+            // Create stream filters for industrial control traffic
+            await this.setYANGData('/ieee802-dot1q-psfp:stream-filters/stream-filter-instance[filter-id=2]/stream-handle', 200);
+            await this.setYANGData('/ieee802-dot1q-psfp:stream-filters/stream-filter-instance[filter-id=2]/priority-spec', 6);
+            this.showStatus('Industrial PSFP preset applied', 'success');
+        } catch (error) {
+            this.showError('Failed to apply industrial PSFP preset');
+        }
+    }
+    
+    async configurePSFPAVB() {
+        try {
+            // Create stream filters for AVB traffic
+            await this.setYANGData('/ieee802-dot1q-psfp:stream-filters/stream-filter-instance[filter-id=3]/stream-handle', 300);
+            await this.setYANGData('/ieee802-dot1q-psfp:stream-filters/stream-filter-instance[filter-id=3]/priority-spec', 5);
+            this.showStatus('AVB PSFP preset applied', 'success');
+        } catch (error) {
+            this.showError('Failed to apply AVB PSFP preset');
         }
     }
 

@@ -58,31 +58,39 @@
                     <nav class="nav-menu">
                         <button class="nav-item active" data-tab="system">
                             <span class="material-icons">dashboard</span>
-                            System Info
+                            System
                         </button>
                         <button class="nav-item" data-tab="interfaces">
                             <span class="material-icons">lan</span>
                             Interfaces
                         </button>
-                        <button class="nav-item" data-tab="yang">
-                            <span class="material-icons">code</span>
-                            YANG Browser
+                        <button class="nav-item" data-tab="bridge">
+                            <span class="material-icons">hub</span>
+                            Bridge
+                        </button>
+                        <button class="nav-item" data-tab="lldp">
+                            <span class="material-icons">device_hub</span>
+                            LLDP
+                        </button>
+                        <button class="nav-item" data-tab="ptp">
+                            <span class="material-icons">access_time</span>
+                            PTP
                         </button>
                         <button class="nav-item" data-tab="tsn">
                             <span class="material-icons">schedule</span>
-                            TSN Configuration
-                        </button>
-                        <button class="nav-item" data-tab="frer">
-                            <span class="material-icons">sync_alt</span>
-                            FRER (Redundancy)
+                            TSN/QoS
                         </button>
                         <button class="nav-item" data-tab="psfp">
                             <span class="material-icons">filter_alt</span>
-                            PSFP (Filtering)
+                            PSFP
                         </button>
-                        <button class="nav-item" data-tab="monitor">
-                            <span class="material-icons">analytics</span>
-                            Monitoring
+                        <button class="nav-item" data-tab="stream-id">
+                            <span class="material-icons">stream</span>
+                            Stream ID
+                        </button>
+                        <button class="nav-item" data-tab="yang">
+                            <span class="material-icons">code</span>
+                            YANG
                         </button>
                         <button class="nav-item" data-tab="logs">
                             <span class="material-icons">description</span>
@@ -256,6 +264,49 @@
                     </div>
                 </div>
 
+                <!-- Stream ID Tab -->
+                <div class="tab-content" id="stream-id-tab">
+                    <div class="content-header">
+                        <h2>Stream Identification (802.1CB)</h2>
+                        <button class="btn btn-icon" id="refreshStreamIdBtn">
+                            <span class="material-icons">refresh</span>
+                        </button>
+                    </div>
+                    <div class="card">
+                        <h3>Stream Identity Table</h3>
+                        <div class="form-group">
+                            <button class="btn btn-primary" onclick="app.addStreamIdentity()">Add Stream Identity</button>
+                        </div>
+                        <table id="streamIdentityTable">
+                            <thead>
+                                <tr>
+                                    <th>Index</th>
+                                    <th>Stream Handle</th>
+                                    <th>Input Port</th>
+                                    <th>Output Ports</th>
+                                    <th>Priority</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="6">No stream identities configured</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <h3>Stream Identification Type</h3>
+                        <div class="form-group">
+                            <label>Identification Type:</label>
+                            <select id="streamIdType">
+                                <option value="null">Null Stream Identification</option>
+                                <option value="smac-vlan">Source MAC + VLAN</option>
+                                <option value="dmac-vlan">Destination MAC + VLAN</option>
+                                <option value="ip">IP Stream Identification</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Monitoring Tab -->
                 <div class="tab-content" id="monitor-tab">
                     <div class="content-header">
@@ -285,64 +336,151 @@
                     </div>
                 </div>
 
-                <!-- FRER Tab -->
-                <div class="tab-content" id="frer-tab">
+                <!-- Bridge Tab -->
+                <div class="tab-content" id="bridge-tab">
                     <div class="content-header">
-                        <h2>FRER (Frame Replication and Elimination for Reliability)</h2>
-                        <div class="frer-actions">
-                            <button class="btn btn-secondary" id="refreshFRERBtn">
-                                <span class="material-icons">refresh</span>
-                                Refresh
-                            </button>
-                            <button class="btn btn-primary" id="createStreamBtn">
-                                <span class="material-icons">add</span>
-                                Create Stream
-                            </button>
+                        <h2>Bridge Configuration</h2>
+                        <button class="btn btn-icon" id="refreshBridgeBtn">
+                            <span class="material-icons">refresh</span>
+                        </button>
+                    </div>
+                    <div class="card">
+                        <h3>Bridge Components</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Bridge Name:</label>
+                                <span id="bridgeName">--</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Bridge Address:</label>
+                                <span id="bridgeAddress">--</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Number of Ports:</label>
+                                <span id="bridgeNumPorts">--</span>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="frer-sections">
-                        <!-- Stream Identification -->
-                        <div class="card">
-                            <h3>Stream Identification</h3>
-                            <div class="streams-container" id="streamsContainer">
-                                <!-- Dynamically populated -->
-                            </div>
+                    <div class="card">
+                        <h3>Filtering Database</h3>
+                        <div class="form-group">
+                            <label>Ageing Time (seconds):</label>
+                            <input type="number" id="bridgeAgeingTime" value="300" min="10" max="1000000">
+                            <button class="btn btn-primary" onclick="app.setBridgeAgeingTime()">Set</button>
                         </div>
-                        
-                        <!-- Sequence Recovery Functions -->
-                        <div class="card">
-                            <h3>Sequence Recovery Functions</h3>
-                            <div class="recovery-container" id="recoveryContainer">
-                                <!-- Dynamically populated -->
-                            </div>
-                            <button class="btn btn-secondary" id="createRecoveryBtn">
-                                <span class="material-icons">add</span>
-                                Add Recovery Function
-                            </button>
+                        <div class="form-group">
+                            <label>Learning Disable:</label>
+                            <input type="checkbox" id="bridgeLearningDisable">
+                            <button class="btn btn-primary" onclick="app.setBridgeLearning()">Apply</button>
                         </div>
-                        
-                        <!-- FRER Statistics -->
-                        <div class="card">
-                            <h3>FRER Statistics</h3>
-                            <div class="frer-stats" id="frerStats">
-                                <!-- Real-time statistics -->
-                            </div>
+                        <table id="fdbTable">
+                            <thead>
+                                <tr>
+                                    <th>VLAN ID</th>
+                                    <th>MAC Address</th>
+                                    <th>Port</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="4">No entries</td></tr>
+                            </tbody>
+                        </table>
+                        <button class="btn btn-secondary" onclick="app.flushFDB()">Flush FDB</button>
+                    </div>
+                </div>
+                
+                <!-- LLDP Tab -->
+                <div class="tab-content" id="lldp-tab">
+                    <div class="content-header">
+                        <h2>LLDP Configuration</h2>
+                        <button class="btn btn-icon" id="refreshLLDPBtn">
+                            <span class="material-icons">refresh</span>
+                        </button>
+                    </div>
+                    <div class="card">
+                        <h3>LLDP Settings</h3>
+                        <div class="form-group">
+                            <label>LLDP Enabled:</label>
+                            <input type="checkbox" id="lldpEnabled" checked>
+                            <button class="btn btn-primary" onclick="app.setLLDPEnabled()">Apply</button>
                         </div>
-                        
-                        <!-- FRER Presets -->
-                        <div class="card">
-                            <h3>Automotive Presets</h3>
-                            <div class="preset-buttons">
-                                <button class="btn btn-outline" onclick="app.applyFRERPreset('automotive-ecu')">
-                                    ECU Protection
-                                </button>
-                                <button class="btn btn-outline" onclick="app.applyFRERPreset('gateway-redundancy')">
-                                    Gateway Redundancy
-                                </button>
-                                <button class="btn btn-outline" onclick="app.applyFRERPreset('sensor-fusion')">
-                                    Sensor Fusion
-                                </button>
+                        <div class="form-group">
+                            <label>Message TX Interval (seconds):</label>
+                            <input type="number" id="lldpTxInterval" value="30" min="5" max="32768">
+                            <button class="btn btn-primary" onclick="app.setLLDPInterval()">Set</button>
+                        </div>
+                        <div class="form-group">
+                            <label>Message TX Hold:</label>
+                            <input type="number" id="lldpTxHold" value="4" min="2" max="10">
+                            <button class="btn btn-primary" onclick="app.setLLDPHold()">Set</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>LLDP Neighbors</h3>
+                        <table id="lldpNeighborsTable">
+                            <thead>
+                                <tr>
+                                    <th>Port</th>
+                                    <th>Chassis ID</th>
+                                    <th>Port ID</th>
+                                    <th>System Name</th>
+                                    <th>TTL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="5">No neighbors discovered</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- PTP Tab -->
+                <div class="tab-content" id="ptp-tab">
+                    <div class="content-header">
+                        <h2>PTP (IEEE 1588) Configuration</h2>
+                        <button class="btn btn-icon" id="refreshPTPBtn">
+                            <span class="material-icons">refresh</span>
+                        </button>
+                    </div>
+                    <div class="card">
+                        <h3>PTP Instance Configuration</h3>
+                        <div class="form-group">
+                            <label>Domain Number:</label>
+                            <input type="number" id="ptpDomainNumber" value="0" min="0" max="127">
+                        </div>
+                        <div class="form-group">
+                            <label>Priority 1:</label>
+                            <input type="number" id="ptpPriority1" value="128" min="0" max="255">
+                        </div>
+                        <div class="form-group">
+                            <label>Priority 2:</label>
+                            <input type="number" id="ptpPriority2" value="128" min="0" max="255">
+                        </div>
+                        <div class="form-group">
+                            <label>Clock Class:</label>
+                            <input type="number" id="ptpClockClass" value="248" min="0" max="255">
+                        </div>
+                        <button class="btn btn-primary" onclick="app.applyPTPConfig()">Apply Configuration</button>
+                    </div>
+                    <div class="card">
+                        <h3>PTP Status</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Port State:</label>
+                                <span id="ptpPortState">--</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Clock Identity:</label>
+                                <span id="ptpClockIdentity">--</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Parent Clock ID:</label>
+                                <span id="ptpParentClockId">--</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Offset from Master:</label>
+                                <span id="ptpOffsetFromMaster">--</span>
                             </div>
                         </div>
                     </div>
