@@ -52,44 +52,77 @@ class VelocityDriveSPApp {
     
     setupEventListeners() {
         // Connection buttons
-        document.getElementById('connectBtn').addEventListener('click', () => this.connect());
-        document.getElementById('disconnectBtn').addEventListener('click', () => this.disconnect());
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        
+        if (connectBtn) connectBtn.addEventListener('click', () => this.connect());
+        if (disconnectBtn) disconnectBtn.addEventListener('click', () => this.disconnect());
         
         // System tab
-        document.getElementById('refreshSystemBtn').addEventListener('click', () => this.refreshSystemInfo());
+        const refreshSystemBtn = document.getElementById('refreshSystemBtn');
+        if (refreshSystemBtn) refreshSystemBtn.addEventListener('click', () => this.refreshSystemInfo());
         
         // Interfaces tab
-        document.getElementById('refreshInterfacesBtn').addEventListener('click', () => this.refreshInterfaces());
+        const refreshInterfacesBtn = document.getElementById('refreshInterfacesBtn');
+        if (refreshInterfacesBtn) refreshInterfacesBtn.addEventListener('click', () => this.refreshInterfaces());
         
         // YANG browser
-        document.getElementById('loadModuleBtn').addEventListener('click', () => this.loadYANGModule());
-        document.getElementById('validateBtn').addEventListener('click', () => this.validateConfig());
-        document.getElementById('applyBtn').addEventListener('click', () => this.applyConfig());
+        const loadModuleBtn = document.getElementById('loadModuleBtn');
+        const validateBtn = document.getElementById('validateBtn');
+        const applyBtn = document.getElementById('applyBtn');
+        
+        if (loadModuleBtn) loadModuleBtn.addEventListener('click', () => this.loadYANGModule());
+        if (validateBtn) validateBtn.addEventListener('click', () => this.validateConfig());
+        if (applyBtn) applyBtn.addEventListener('click', () => this.applyConfig());
         
         // TSN Configuration
-        document.getElementById('applyCBSBtn').addEventListener('click', () => this.applyCBSConfig());
-        document.getElementById('applyTASBtn').addEventListener('click', () => this.applyTASConfig());
-        document.getElementById('applyPTPBtn').addEventListener('click', () => this.applyPTPConfig());
+        const applyCBSBtn = document.getElementById('applyCBSBtn');
+        const applyTASBtn = document.getElementById('applyTASBtn');
+        const applyPTPBtn = document.getElementById('applyPTPBtn');
+        
+        if (applyCBSBtn) applyCBSBtn.addEventListener('click', () => this.applyCBSConfig());
+        if (applyTASBtn) applyTASBtn.addEventListener('click', () => this.applyTASConfig());
+        if (applyPTPBtn) applyPTPBtn.addEventListener('click', () => this.applyPTPConfig());
         
         // Monitoring
-        document.getElementById('startMonitorBtn').addEventListener('click', () => this.startMonitoring());
-        document.getElementById('stopMonitorBtn').addEventListener('click', () => this.stopMonitoring());
+        const startMonitorBtn = document.getElementById('startMonitorBtn');
+        const stopMonitorBtn = document.getElementById('stopMonitorBtn');
+        
+        if (startMonitorBtn) startMonitorBtn.addEventListener('click', () => this.startMonitoring());
+        if (stopMonitorBtn) stopMonitorBtn.addEventListener('click', () => this.stopMonitoring());
         
         // Quick actions
-        document.getElementById('rebootBtn').addEventListener('click', () => this.rebootDevice());
-        document.getElementById('saveConfigBtn').addEventListener('click', () => this.saveConfiguration());
-        document.getElementById('exportBtn').addEventListener('click', () => this.exportConfig());
-        document.getElementById('importBtn').addEventListener('click', () => this.importConfig());
+        const rebootBtn = document.getElementById('rebootBtn');
+        const saveConfigBtn = document.getElementById('saveConfigBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const importBtn = document.getElementById('importBtn');
+        
+        if (rebootBtn) rebootBtn.addEventListener('click', () => this.rebootDevice());
+        if (saveConfigBtn) saveConfigBtn.addEventListener('click', () => this.saveConfiguration());
+        if (exportBtn) exportBtn.addEventListener('click', () => this.exportConfig());
+        if (importBtn) importBtn.addEventListener('click', () => this.importConfig());
         
         // Logs
-        document.getElementById('clearLogsBtn').addEventListener('click', () => this.clearLogs());
-        document.getElementById('logLevel').addEventListener('change', (e) => this.filterLogs(e.target.value));
+        const clearLogsBtn = document.getElementById('clearLogsBtn');
+        const logLevel = document.getElementById('logLevel');
         
-        // Serial event handlers
-        this.serial.on('data', (data) => this.handleSerialData(data));
-        this.serial.on('connected', () => this.onConnected());
-        this.serial.on('disconnected', () => this.onDisconnected());
-        this.serial.on('error', (error) => this.onError(error));
+        if (clearLogsBtn) clearLogsBtn.addEventListener('click', () => this.clearLogs());
+        if (logLevel) logLevel.addEventListener('change', (e) => this.filterLogs(e.target.value));
+        
+        // Device manager event handlers (will be set up after device connection)
+        if (this.deviceManager) {
+            this.deviceManager.on('deviceConnected', (event) => {
+                this.onDeviceConnected(event.detail);
+            });
+            
+            this.deviceManager.on('deviceDisconnected', (event) => {
+                this.onDeviceDisconnected(event.detail);
+            });
+            
+            this.deviceManager.on('deviceError', (event) => {
+                this.onDeviceError(event.detail);
+            });
+        }
     }
     
     setupTabs() {
@@ -154,7 +187,7 @@ class VelocityDriveSPApp {
             this.ui.updateStatus('Connecting to device...', 'info');
             
             // Connect to selected device
-            const device = await this.deviceManager.connectDevice(selectedDevice.id, {
+            const device = await this.deviceManager.connectDevice(selectedDevice, {
                 baudRate: 115200,
                 dataBits: 8,
                 stopBits: 1,
@@ -382,49 +415,57 @@ class VelocityDriveSPApp {
     
     async disconnect() {
         try {
-            await this.serial.disconnect();
+            if (this.currentDevice) {
+                await this.deviceManager.disconnectDevice(this.currentDevice.id);
+            }
         } catch (error) {
             console.error('Disconnect failed:', error);
+            this.ui.showError('Failed to disconnect: ' + error.message);
         }
     }
     
-    onConnected() {
+    // Device connection event handlers
+    onDeviceConnected(deviceData) {
+        const { deviceId, device } = deviceData;
         this.isConnected = true;
-        document.getElementById('connectBtn').style.display = 'none';
-        document.getElementById('disconnectBtn').style.display = 'block';
+        this.currentDevice = device;
         
         // Update UI
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        
+        if (connectBtn) connectBtn.style.display = 'none';
+        if (disconnectBtn) disconnectBtn.style.display = 'block';
+        
         const statusIndicator = document.getElementById('statusIndicator');
-        statusIndicator.classList.add('connected');
-        statusIndicator.querySelector('.status-text').textContent = 'Connected';
+        if (statusIndicator) {
+            statusIndicator.classList.add('connected');
+            const statusText = statusIndicator.querySelector('.status-text');
+            if (statusText) statusText.textContent = 'Connected';
+        }
         
-        document.getElementById('portInfo').style.display = 'flex';
-        document.getElementById('portName').textContent = this.serial.getPortInfo();
+        const portInfo = document.getElementById('portInfo');
+        const portName = document.getElementById('portName');
         
-        this.ui.updateStatus('Connected to device', 'success');
-        this.addLog('Connected to VelocityDRIVE SP device', 'info');
+        if (portInfo && portName) {
+            portInfo.style.display = 'flex';
+            portName.textContent = device.name || device.id;
+        }
+        
+        this.ui.updateStatus(`Connected to ${device.name}`, 'success');
+        this.addLog(`Connected to ${device.name}`, 'info');
         
         // Load initial data
         this.refreshSystemInfo();
     }
     
-    onDisconnected() {
-        this.isConnected = false;
-        document.getElementById('connectBtn').style.display = 'block';
-        document.getElementById('disconnectBtn').style.display = 'none';
-        
-        // Update UI
-        const statusIndicator = document.getElementById('statusIndicator');
-        statusIndicator.classList.remove('connected');
-        statusIndicator.querySelector('.status-text').textContent = 'Disconnected';
-        
-        document.getElementById('portInfo').style.display = 'none';
-        
-        this.ui.updateStatus('Disconnected', 'info');
-        this.addLog('Disconnected from device', 'info');
-        
-        // Stop monitoring if active
-        this.stopMonitoring();
+    onDeviceDisconnected(deviceData) {
+        this.handleDeviceDisconnected();
+    }
+    
+    onDeviceError(deviceData) {
+        const { error } = deviceData;
+        this.handleDeviceError(error);
     }
     
     onError(error) {

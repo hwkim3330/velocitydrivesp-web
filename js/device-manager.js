@@ -136,9 +136,23 @@ export class DeviceManager extends EventTarget {
         }
     }
     
+    // Get device info by ID
+    async getDeviceInfo(deviceId) {
+        // First try to find in discovered devices
+        const devices = await this.startDiscovery();
+        return devices.find(device => device.id === deviceId);
+    }
+    
     // Connect to device
     async connectDevice(deviceId, options = {}) {
-        const deviceInfo = await this.getDeviceInfo(deviceId);
+        let deviceInfo = await this.getDeviceInfo(deviceId);
+        
+        // If not found, check if it's a manual device passed directly
+        if (!deviceInfo && typeof deviceId === 'object') {
+            deviceInfo = deviceId;
+            deviceId = deviceInfo.id;
+        }
+        
         if (!deviceInfo) {
             throw new Error(`Device ${deviceId} not found`);
         }
