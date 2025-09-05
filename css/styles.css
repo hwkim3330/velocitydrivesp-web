@@ -868,6 +868,182 @@ body {
     border-top: 4px solid var(--success-color);
 }
 
+/* CT-style Data Display */
+.data-container {
+    padding: 20px;
+    background: var(--color-background);
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.data-section {
+    margin: 15px 0;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.data-section h4 {
+    margin: 0 0 10px 0;
+    color: var(--color-accent);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.data-display {
+    background: #f5f5f5;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+}
+
+.hex-display {
+    background: #000;
+    color: #00ff00;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    overflow-x: auto;
+    word-break: break-all;
+    line-height: 1.4;
+}
+
+.data-timestamp {
+    text-align: right;
+    font-size: 12px;
+    color: #666;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.loading-message p {
+    margin: 10px 0;
+}
+
+/* Status Messages */
+.status-message {
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+    font-weight: 500;
+    display: none;
+}
+
+.status-message.info {
+    background: #e3f2fd;
+    color: #1976d2;
+    border: 1px solid #90caf9;
+}
+
+.status-message.success {
+    background: #e8f5e8;
+    color: #2e7d32;
+    border: 1px solid #81c784;
+}
+
+.status-message.warning {
+    background: #fff3e0;
+    color: #f57c00;
+    border: 1px solid #ffb74d;
+}
+
+.status-message.error {
+    background: #ffebee;
+    color: #d32f2f;
+    border: 1px solid #e57373;
+}
+
+/* Connection Status Indicator */
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.status-indicator.connected {
+    background: #e8f5e8;
+    color: #2e7d32;
+    border: 1px solid #81c784;
+}
+
+.status-indicator.disconnected {
+    background: #ffebee;
+    color: #d32f2f;
+    border: 1px solid #e57373;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #f44336;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.connected .status-dot {
+    background: #4CAF50;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Data Tables */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    background: white;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.data-table th,
+.data-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.data-table th {
+    background: var(--primary-color);
+    color: white;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+.data-table tbody tr:hover {
+    background: #f5f5f5;
+}
+
+.data-table td {
+    font-size: 14px;
+}
+
 .modal-info .modal-content {
     border-top: 4px solid var(--primary-color);
 }

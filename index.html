@@ -209,7 +209,19 @@
                                     <button class="btn btn-sm btn-primary" id="applyBtn">Apply</button>
                                 </div>
                             </div>
-                            <textarea id="yangEditor" class="code-editor"></textarea>
+                            <div class="yang-inputs">
+                                <div class="form-group">
+                                    <label for="yangPath">YANG Path or SID:</label>
+                                    <input type="text" id="yangPath" class="input" placeholder="/ietf-system:system/hostname or 19023">
+                                    <button class="btn btn-sm btn-secondary" id="yangFetch">Fetch</button>
+                                </div>
+                                <div class="form-group">
+                                    <label for="yangValue">Value:</label>
+                                    <input type="text" id="yangValue" class="input" placeholder="Enter value to set">
+                                    <button class="btn btn-sm btn-primary" id="yangSet">Set</button>
+                                </div>
+                            </div>
+                            <textarea id="yangEditor" class="code-editor" placeholder="Configuration response will appear here..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -636,6 +648,6 @@
     <script src="js/mup1-protocol.js"></script>
     <script src="js/coap-protocol.js"></script>
     <script src="js/robust-serial.js"></script>
-    <script src="js/main-app.js"></script>
+    <script src="js/main-app-new.js"></script>
 </body>
 </html>
