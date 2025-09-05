@@ -43,6 +43,7 @@ const YANG_PATHS = {
 class VelocityDriveWebApp {
     constructor() {
         this.serial = null;
+        this.ct = null; // VelocityDriveCT protocol handler
         this.isConnected = false;
         this.deviceInfo = null;
         this.messageId = 1;
@@ -216,6 +217,9 @@ class VelocityDriveWebApp {
             // Initialize serial connection
             this.serial = new window.RobustSerialController();
             
+            // Initialize CT protocol handler
+            this.ct = new window.VelocityDriveCT();
+            
             // Override handleData to process incoming messages
             this.serial.handleData = (data) => this.handleIncomingData(data);
             
@@ -227,8 +231,8 @@ class VelocityDriveWebApp {
             this.isConnected = true;
             this.updateConnectionUI(true);
             
-            // CT Sequence: Start with ping
-            await this.sendPing();
+            // Connect CT protocol handler
+            await this.ct.connect(this.serial);
             
         } catch (error) {
             console.error('Connection failed:', error);
@@ -260,13 +264,24 @@ class VelocityDriveWebApp {
     handleIncomingData(data) {
         console.log('Received data:', data);
         
-        // Check for pong response
-        if (data.includes('>P') && data.includes('VelocitySP')) {
-            this.handlePongResponse(data);
-        }
-        // Check for CoAP response (starts with >C or has MUP1 'C' frame)
-        else if (data.includes('>C') || data.includes('C')) {
-            this.handleCoAPResponse(data);
+        // Pass to CT protocol handler
+        if (this.ct) {
+            // Check for pong response
+            if (data.includes('>P') && data.includes('VelocitySP')) {
+                this.ct.handlePongResponse(data);
+                this.deviceInfo = this.ct.deviceInfo;
+                if (this.deviceInfo) {
+                    this.showStatusMessage(`Connected: ${this.deviceInfo.version}`, 'success');
+                    this.updateDeviceInfo();
+                }
+            }
+            // Check for CoAP response
+            else if (data.includes('>C') || data.includes('C')) {
+                const decoded = this.ct.handleCoAPResponse(data);
+                if (decoded) {
+                    this.updateUIWithData(decoded);
+                }
+            }
         }
     }
 
@@ -484,6 +499,47 @@ class VelocityDriveWebApp {
         this.updateTabContent(result);
     }
 
+    updateDeviceInfo() {
+        // Display device info in UI
+        if (this.deviceInfo) {
+            const infoEl = document.getElementById('device-info');
+            if (infoEl) {
+                infoEl.innerHTML = `
+                    <h3>Device Info</h3>
+                    <div class="info-item">
+                        <span class="info-label">Version:</span>
+                        <span class="info-value">${this.deviceInfo.version}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Uptime:</span>
+                        <span class="info-value">${this.deviceInfo.uptime}s</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Max Size:</span>
+                        <span class="info-value">${this.deviceInfo.maxSize}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">MUP1 Version:</span>
+                        <span class="info-value">${this.deviceInfo.mup1Version}</span>
+                    </div>
+                `;
+                infoEl.style.display = 'block';
+            }
+        }
+    }
+    
+    updateUIWithData(data) {
+        // Update UI with decoded CBOR data
+        console.log('Updating UI with data:', data);
+        
+        // Store data for the current tab
+        const activeTab = document.querySelector('.nav-item.active')?.dataset.tab;
+        if (activeTab) {
+            this.tabData.set(activeTab, data);
+            this.renderTabData(activeTab, data);
+        }
+    }
+    
     updateTabContent(data) {
         const tabName = this.lastDataType;
         if (!tabName) return;
