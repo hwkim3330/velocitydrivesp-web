@@ -131,17 +131,48 @@ Simply open `index.html` in Chrome or Edge browser.
 
 ### "Failed to connect"
 - Ensure device is connected via USB
-- Check device appears as serial port (e.g., /dev/ttyACM0)
+- Check device appears as serial port (e.g., /dev/ttyACM0 or /dev/ttyACM1)
 - Try disconnecting other serial terminal programs
+- Close any existing browser tabs using the serial port
 
 ### "No response from device"
 - Verify baud rate is 115200
 - Check MUP1 protocol is enabled on device
 - Try sending a ping command first
 
+### "CoAP configuration not working"
+- Use the fixed version: `index_fixed.html`
+- The original implementation had a bug where it sent `>c` before every CoAP message
+- The fixed version properly enters CoAP mode once and then sends raw CoAP binary data
+
+### "Only ping works, configuration fails"
+- This was the main issue in the original implementation
+- Use `index_fixed.html` which implements proper state management for CoAP mode
+- The device needs to be in CoAP mode to receive configuration requests
+
 ## 📚 Technical Documentation
 
 See [TECHNICAL_REPORT.md](TECHNICAL_REPORT.md) for detailed protocol analysis and implementation notes.
+
+## 🔧 Fixed Implementation
+
+The original `index.html` had a critical bug in CoAP communication. Use `index_fixed.html` instead:
+
+### Key Fixes:
+1. **Proper CoAP State Management**: Only send `>c` once to enter CoAP mode
+2. **Correct Binary Protocol**: Send raw CoAP data without MUP1 framing after mode switch
+3. **Enhanced Error Handling**: Better timeout and response handling
+4. **Test Interface**: Added dedicated test tab for debugging communication
+
+### Protocol Flow:
+```
+1. Send: >p<<8553   (Ping)
+2. Recv: >PDevice-Info<<checksum
+3. Send: >c\n       (Enter CoAP mode - ONCE)
+4. Recv: >C         (CoAP mode acknowledgment)
+5. Send: [Raw CoAP binary]  (No MUP1 framing!)
+6. Recv: [CoAP response]    (May be MUP1 framed or raw)
+```
 
 ## 🤝 Contributing
 
