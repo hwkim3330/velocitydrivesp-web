@@ -1007,18 +1007,8 @@ select.form-input {
     <div class="sidebar">
       <div class="sidebar-header">YANG Tree Browser</div>
       <div class="tree-view" id="yangTree">
-        <div class="tree-item" data-path="/ietf-interfaces:interfaces">
-          <span class="tree-icon">📁</span>
-          ietf-interfaces
-        </div>
-        <div class="tree-item" data-path="/ietf-system:system">
-          <span class="tree-icon">⚙️</span>
-          ietf-system
-        </div>
-        <div class="tree-item" data-path="/ieee802-dot1q-bridge:bridges">
-          <span class="tree-icon">🌉</span>
-          ieee802-dot1q-bridge
-        </div>
+        <!-- Dynamic YANG tree will be populated here -->
+        <div class="tree-loading">🔄 Loading YANG modules...</div>
       </div>
     </div>
 
@@ -1132,6 +1122,23 @@ class MUP1Protocol {
     return '>c\n';
   }
 
+  createCoapDataFrame(coapMessage) {
+    // Convert CoAP binary message to hex string for MUP1 transmission
+    const hexData = Array.from(coapMessage)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    
+    // Calculate checksum (simple XOR for now, might need different algorithm)
+    let checksum = 0;
+    for (let i = 0; i < coapMessage.length; i++) {
+      checksum ^= coapMessage[i];
+    }
+    const checksumHex = checksum.toString(16).padStart(4, '0');
+    
+    // Format: >d[HEX_DATA]<<CHECKSUM
+    return `>d${hexData}<<${checksumHex}\n`;
+  }
+
   parseFrame(data) {
     if (data.startsWith('>P')) {
       // Ping response
@@ -1140,6 +1147,14 @@ class MUP1Protocol {
     } else if (data.startsWith('>C')) {
       // CoAP mode confirmation
       return { type: 'coap-init-response' };
+    } else if (data.startsWith('>D')) {
+      // CoAP data response - extract hex data and convert back to binary
+      const match = data.match(/>D([0-9a-fA-F]+)<</);
+      if (match) {
+        const hexData = match[1];
+        const binaryData = new Uint8Array(hexData.match(/.{2}/g).map(hex => parseInt(hex, 16)));
+        return { type: 'coap-data-response', data: binaryData };
+      }
     } else if (data.startsWith('>T')) {
       // Trace response
       return { type: 'trace-response', data: data };
@@ -1183,18 +1198,28 @@ class CoapProtocol {
     options.push(0xB4); // Option 11, length 4  
     options.push(...dataBytes);
 
-    // Add YANG path if provided
+    // Add YANG path as SID if provided
     if (uri && uri !== '/') {
       const yangPath = uri.replace(/^\//, '');
       if (yangPath) {
-        const pathBytes = new TextEncoder().encode(yangPath);
-        if (pathBytes.length < 13) {
-          options.push(0xB0 | pathBytes.length);
+        // Convert YANG path to SID
+        const sid = yangToSidMap[yangPath];
+        if (sid) {
+          // Add SID as path option
+          const sidBytes = new Uint8Array([(sid >> 8) & 0xFF, sid & 0xFF]);
+          options.push(0xB2); // Option 11, length 2
+          options.push(...sidBytes);
         } else {
-          options.push(0xBD);
-          options.push(pathBytes.length - 13);
+          // Fallback to original path if SID not found
+          const pathBytes = new TextEncoder().encode(yangPath);
+          if (pathBytes.length < 13) {
+            options.push(0xB0 | pathBytes.length);
+          } else {
+            options.push(0xBD);
+            options.push(pathBytes.length - 13);
+          }
+          options.push(...pathBytes);
         }
-        options.push(...pathBytes);
       }
     }
 
@@ -1490,9 +1515,10 @@ async function sendCoapRequest(method, uri, payload = null) {
   await enterCoapMode();
   
   const message = coap.buildMessage(method, uri, payload);
-  await writer.write(message);
+  const mup1Frame = mup1.createCoapDataFrame(message);
+  await writer.write(new TextEncoder().encode(mup1Frame));
   
-  logMessage('SEND', method, coap.messageId - 1, message.length, `${method} ${uri}`);
+  logMessage('SEND', method, coap.messageId - 1, mup1Frame.length, `${method} ${uri} (MUP1 wrapped)`);
   
   // Store pending request for response matching
   const requestId = coap.messageId - 1;
@@ -1513,29 +1539,40 @@ async function sendCoapRequest(method, uri, payload = null) {
 
 async function handleReceiveData(data) {
   if (coapModeActive) {
-    // In CoAP mode, expect binary CoAP responses
+    // In CoAP mode, expect MUP1-wrapped CoAP responses
     try {
-      const response = coap.parseMessage(data);
-      if (response && response.messageId !== undefined) {
-        // Find matching request
-        const request = pendingRequests.get(response.messageId);
-        if (request) {
-          clearTimeout(request.timeout);
-          pendingRequests.delete(response.messageId);
-          
-          logMessage('RECV', 'COAP_RESP', response.messageId, data.length, 
-                    `Code: ${response.code}, Payload: ${response.payload ? response.payload.length + ' bytes' : 'none'}`);
-          
-          if (request.resolve) {
-            request.resolve(response);
+      const textData = new TextDecoder().decode(data);
+      const mup1Response = mup1.parseFrame(textData);
+      
+      if (mup1Response.type === 'coap-data-response') {
+        // Extract binary CoAP data from MUP1 frame
+        const coapBinaryData = mup1Response.data;
+        const response = coap.parseMessage(coapBinaryData);
+        
+        if (response && response.messageId !== undefined) {
+          // Find matching request
+          const request = pendingRequests.get(response.messageId);
+          if (request) {
+            clearTimeout(request.timeout);
+            pendingRequests.delete(response.messageId);
+            
+            logMessage('RECV', 'COAP_RESP', response.messageId, coapBinaryData.length, 
+                      `Code: ${response.code}, Payload: ${response.payload ? response.payload.length + ' bytes' : 'none'}`);
+            
+            if (request.resolve) {
+              request.resolve(response);
+            }
+          } else {
+            logMessage('RECV', 'COAP_RESP', response.messageId, coapBinaryData.length, 'Unmatched response');
           }
-        } else {
-          logMessage('RECV', 'COAP_RESP', response.messageId, data.length, 'Unmatched response');
         }
+      } else {
+        // Handle other MUP1 frame types (ping, etc.)
+        logMessage('RECV', 'MUP1_FRAME', null, textData.length, `Type: ${mup1Response.type}`);
       }
     } catch (error) {
-      console.warn('Failed to parse CoAP response:', error);
-      logMessage('RECV', 'COAP_RAW', null, data.length, 'Binary data (parse failed)');
+      console.warn('Failed to parse MUP1/CoAP response:', error);
+      logMessage('RECV', 'RAW_DATA', null, data.length, 'Failed to parse (binary/text data)');
     }
   } else {
     // In MUP1 mode, parse text frames
@@ -1761,9 +1798,52 @@ document.querySelectorAll('.tree-item').forEach(item => {
   });
 });
 
+// Statistics update function
+function updateStatistics() {
+  if (window.yangSidMap) {
+    document.getElementById('totalSids').textContent = Object.keys(window.yangSidMap).length;
+  }
+  
+  if (window.moduleStats) {
+    const totalModules = Object.keys(window.moduleStats).filter(module => window.moduleStats[module] > 0).length;
+    document.getElementById('totalModules').textContent = totalModules;
+    
+    // Update module breakdown
+    const moduleStatsDiv = document.getElementById('moduleStats');
+    if (moduleStatsDiv) {
+      const statsText = Object.entries(window.moduleStats)
+        .filter(([module, count]) => count > 0)
+        .sort(([,a], [,b]) => b - a)
+        .map(([module, count]) => `${module}: ${count} mappings`)
+        .join('\n');
+      moduleStatsDiv.textContent = statsText;
+    }
+  }
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
   logMessage('INFO', 'INIT', null, 0, 'VelocityDRIVE-SP Web Control initialized');
+  
+  // Initialize YANG Tree Browser
+  if (window.yangSidMap && window.YangTreeBuilder) {
+    const treeBuilder = new YangTreeBuilder(window.yangSidMap);
+    treeBuilder.renderTree('yangTree');
+    logMessage('INFO', 'INIT', null, 0, `YANG tree loaded with ${Object.keys(window.yangSidMap).length} SID mappings`);
+    
+    // Set up statistics
+    if (window.moduleStats) {
+      updateStatistics();
+    }
+  }
+  
+  // Set up global path selection function for tree builder
+  window.selectYangPath = (path, sid) => {
+    selectedPath = path;
+    selectedSid = sid;
+    document.getElementById('configPath').value = path;
+    logMessage('INFO', 'SELECT', sid, path.length, `Selected: ${path}`);
+  };
 });
 </script>
 </body>
