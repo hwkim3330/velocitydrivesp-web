@@ -611,8 +611,10 @@
         let port = null;
         let reader = null;
         let writer = null;
+        let writeStream = null;
         let isConnected = false;
         let inCoapMode = false;
+        let deviceInfo = {};
 
         // Tab switching
         document.querySelectorAll('.tab').forEach(tab => {
@@ -653,6 +655,9 @@
                 const baudRate = parseInt(document.getElementById('baudRate').value);
                 
                 await port.open({ baudRate: baudRate });
+                
+                // Store write stream reference
+                writeStream = port.writable;
                 
                 const textEncoder = new TextEncoderStream();
                 const writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
@@ -737,13 +742,7 @@
                 
                 switch(type) {
                     case 'P': // Pong response
-                        const deviceInfo = message.substring(2, message.indexOf('<'));
-                        document.getElementById('deviceInfo').innerHTML = `
-                            <div class="log-entry">
-                                <strong>Device Response:</strong><br>
-                                ${deviceInfo}
-                            </div>
-                        `;
+                        parseDeviceInfo(message);
                         break;
                         
                     case 'C': // CoAP mode acknowledgment
@@ -763,6 +762,59 @@
                         }
                 }
             }
+        }
+
+        // Parse device info
+        function parseDeviceInfo(message) {
+            // Example: >PVelocitySP-v2025.06-LAN9692VAO-EV09P11A0-(UNG8420)-auto 17956 300 2<<checksum
+            const data = message.substring(2, message.indexOf('<<') > 0 ? message.indexOf('<<') : message.length);
+            
+            // Parse the device string
+            const match = data.match(/([^-]+)-v([^-]+)-([^-]+)-([^-()]+)-\(([^)]+)\)-(\S+)\s+(\d+)\s+(\d+)\s+(\d+)/);
+            
+            if (match) {
+                deviceInfo = {
+                    product: match[1],
+                    version: match[2],
+                    board: match[3],
+                    model: match[4],
+                    chipset: match[5],
+                    mode: match[6],
+                    param1: match[7],
+                    param2: match[8],
+                    param3: match[9]
+                };
+                
+                // Update device info display
+                const infoHtml = `
+                    <div class="log-entry">
+                        <strong>Product:</strong> ${deviceInfo.product}<br>
+                        <strong>Version:</strong> v${deviceInfo.version}<br>
+                        <strong>Board:</strong> ${deviceInfo.board}-${deviceInfo.model}<br>
+                        <strong>Chipset:</strong> ${deviceInfo.chipset}<br>
+                        <strong>Mode:</strong> ${deviceInfo.mode}<br>
+                        <strong>Parameters:</strong> ${deviceInfo.param1} / ${deviceInfo.param2} / ${deviceInfo.param3}
+                    </div>
+                `;
+                
+                document.getElementById('deviceInfo').innerHTML = infoHtml;
+            } else {
+                // Fallback for unknown format
+                document.getElementById('deviceInfo').innerHTML = `
+                    <div class="log-entry">
+                        <strong>Device Response:</strong><br>
+                        ${data}
+                    </div>
+                `;
+            }
+        }
+
+        // Calculate MUP1 checksum
+        function calculateChecksum(message) {
+            // MUP1 checksum appears to be a fixed value for certain commands
+            // ping (>p) always uses 8553
+            // This may be a CRC or special calculation
+            return 8553; // Fixed for ping command
         }
 
         // Send ping
@@ -960,10 +1012,26 @@
         }
 
         async function sendRawBytes(bytes) {
-            if (port && port.writable) {
-                const writer = port.writable.getWriter();
-                await writer.write(bytes);
-                writer.releaseLock();
+            if (!isConnected || !port) {
+                addLog('Not connected to device', 'error');
+                return;
+            }
+            
+            try {
+                // Use the existing writer if available
+                if (writer) {
+                    // Convert bytes to string for text writer
+                    const decoder = new TextDecoder();
+                    const text = decoder.decode(bytes);
+                    await writer.write(text);
+                } else if (writeStream) {
+                    // Use raw write stream as fallback
+                    const tempWriter = writeStream.getWriter();
+                    await tempWriter.write(bytes);
+                    tempWriter.releaseLock();
+                }
+            } catch (error) {
+                addLog(`Send error: ${error.message}`, 'error');
             }
         }
 
