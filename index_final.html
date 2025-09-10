@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VelocityDRIVE-SP Web Control Center - Final</title>
+<style>
+/* Modern Dark Theme */
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a1f2e;
+  --bg-hover: #202938;
+  --border: #2d3748;
+  --text-primary: #e2e8f0;
+  --text-secondary: #a0aec0;
+  --text-muted: #718096;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --code-bg: #0f172a;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 60px;
+}
+
+.logo {
+  font-size: 1.25rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-right: auto;
+}
+
+.btn {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-danger {
+  background: var(--error);
+  border-color: var(--error);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-card);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.status-dot.connected {
+  background: var(--success);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Main Layout */
+.container {
+  display: flex;
+  height: calc(100vh - 60px);
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.tree-view {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.tree-item {
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tree-item:hover {
+  background: var(--bg-hover);
+}
+
+.tree-item.selected {
+  background: var(--accent);
+  color: white;
+}
+
+.tree-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+}
+
+/* Main Content */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  padding: 0.5rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem 0.5rem 0 0;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.content {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.panel-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  background: var(--bg-hover);
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.panel-content {
+  padding: 1rem;
+}
+
+.log {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  height: 300px;
+  overflow-y: auto;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.75rem;
+  padding: 0.5rem;
+}
+
+.log-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(45, 55, 72, 0.3);
+}
+
+.log-time {
+  color: var(--text-muted);
+  min-width: 80px;
+}
+
+.log-direction {
+  min-width: 40px;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+.log-direction.send { background: var(--accent); }
+.log-direction.recv { background: var(--success); }
+
+.log-type {
+  min-width: 60px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.log-data {
+  color: var(--text-secondary);
+  font-family: monospace;
+  word-break: break-all;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+textarea.form-input {
+  min-height: 120px;
+  resize: vertical;
+  font-family: monospace;
+}
+
+select.form-input {
+  cursor: pointer;
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.alert-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.alert-success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+}
+
+.alert-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+}
+
+.sidebar::-webkit-scrollbar,
+.tree-view::-webkit-scrollbar,
+.log::-webkit-scrollbar,
+.content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.tree-view::-webkit-scrollbar-track,
+.log::-webkit-scrollbar-track,
+.content::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.tree-view::-webkit-scrollbar-thumb,
+.log::-webkit-scrollbar-thumb,
+.content::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+.tree-view::-webkit-scrollbar-thumb:hover,
+.log::-webkit-scrollbar-thumb:hover,
+.content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">🚀 VelocityDRIVE-SP Web Control</div>
+    <div class="status" id="connectionStatus">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Disconnected</span>
+    </div>
+    <button class="btn btn-primary" id="connectBtn" onclick="connectDevice()">Connect</button>
+    <button class="btn btn-danger" id="disconnectBtn" onclick="disconnectDevice()" style="display:none;">Disconnect</button>
+  </div>
+
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-header">YANG Tree Browser</div>
+      <div class="tree-view" id="yangTree">
+        <div class="tree-item" data-path="/ietf-interfaces:interfaces">
+          <span class="tree-icon">📁</span>
+          ietf-interfaces
+        </div>
+        <div class="tree-item" data-path="/ietf-system:system">
+          <span class="tree-icon">⚙️</span>
+          ietf-system
+        </div>
+        <div class="tree-item" data-path="/ieee802-dot1q-bridge:bridges">
+          <span class="tree-icon">🌉</span>
+          ieee802-dot1q-bridge
+        </div>
+        <div class="tree-item" data-path="/mchp-velocitysp-system:system">
+          <span class="tree-icon">🔧</span>
+          mchp-velocitysp-system
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="tabs">
+        <div class="tab active" data-tab="monitor">Monitor</div>
+        <div class="tab" data-tab="config">Configuration</div>
+        <div class="tab" data-tab="raw">Raw CoAP</div>
+        <div class="tab" data-tab="test">Test</div>
+      </div>
+
+      <div class="content">
+        <!-- Monitor Tab -->
+        <div id="monitorTab">
+          <div class="panel">
+            <div class="panel-header">Communication Log</div>
+            <div class="panel-content">
+              <div class="log" id="logOutput"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Configuration Tab -->
+        <div id="configTab" style="display:none">
+          <div class="panel">
+            <div class="panel-header">Configuration Manager</div>
+            <div class="panel-content">
+              <div class="form-group">
+                <label class="form-label">YANG Path</label>
+                <input type="text" class="form-input" id="configPath" readonly>
+              </div>
+              <div class="form-group">
+                <button class="btn btn-primary" onclick="getConfig()">Get Configuration</button>
+                <button class="btn btn-primary" onclick="setConfig()">Set Configuration</button>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Configuration Data (JSON)</label>
+                <textarea class="form-input" id="configData" placeholder='{"enabled": true, "name": "eth0"}'></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Test Tab -->
+        <div id="testTab" style="display:none">
+          <div class="panel">
+            <div class="panel-header">CoAP Communication Test</div>
+            <div class="panel-content">
+              <div class="form-group">
+                <button class="btn btn-primary" onclick="testCoapMode()">Test CoAP Mode</button>
+                <button class="btn btn-primary" onclick="testGetInterfaces()">Test Get Interfaces</button>
+                <button class="btn btn-primary" onclick="testGetSystem()">Test Get System</button>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Test Results</label>
+                <textarea class="form-input" id="testResults" readonly></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Raw CoAP Tab -->
+        <div id="rawTab" style="display:none">
+          <div class="panel">
+            <div class="panel-header">Raw CoAP Message Builder</div>
+            <div class="panel-content">
+              <div class="form-group">
+                <label class="form-label">Method</label>
+                <select class="form-input" id="coapMethod">
+                  <option value="GET">GET</option>
+                  <option value="POST">POST</option>
+                  <option value="PUT">PUT</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">URI Path</label>
+                <input type="text" class="form-input" id="coapUri" placeholder="/ietf-interfaces:interfaces">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Payload (CBOR Hex)</label>
+                <textarea class="form-input" id="coapPayload" placeholder="A1 19 07F1 F5"></textarea>
+              </div>
+              <button class="btn btn-primary" onclick="sendRawCoap()">Send CoAP Message</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="js/sid-mapping.js"></script>
+<script>
+// ==================== Global Variables ====================
+let port = null;
+let reader = null;
+let writer = null;
+let isConnected = false;
+let selectedPath = '';
+let messageId = 1;
+let coapModeActive = false;
+let pendingRequests = new Map();
+let receivedBuffer = new Uint8Array();
+
+// ==================== MUP1 Protocol ====================
+class MUP1Protocol {
+  createPingFrame() {
+    return '>p<<8553\\n';
+  }
+
+  createCoapInitFrame() {
+    return '>c\\n';
+  }
+
+  parseFrame(data) {
+    if (data.startsWith('>P')) {
+      // Ping response
+      const parts = data.replace(/^>P/, '').replace(/<<.*$/, '').trim();
+      return { type: 'ping-response', data: parts };
+    } else if (data.startsWith('>C')) {
+      // CoAP mode confirmation
+      return { type: 'coap-init-response' };
+    } else if (data.startsWith('>T')) {
+      // Trace response
+      return { type: 'trace-response', data: data };
+    }
+    return { type: 'unknown', data: data };
+  }
+}
+
+// ==================== CoAP Protocol (Enhanced) ====================
+class CoapProtocol {
+  constructor() {
+    this.messageId = 1;
+  }
+
+  buildMessage(method, uri, payload = null) {
+    const methodCode = {
+      'GET': 0x01,
+      'POST': 0x02,
+      'PUT': 0x03,
+      'DELETE': 0x04
+    }[method] || 0x01;
+
+    // Header: Ver=1, Type=0 (CON), TKL=0
+    const header = new Uint8Array([
+      0x40, // Ver=1, Type=0, TKL=0
+      methodCode,
+      (this.messageId >> 8) & 0xFF,
+      this.messageId & 0xFF
+    ]);
+    this.messageId++;
+
+    // Build options properly for CORECONF
+    const options = [];
+    
+    // Add Uri-Path: coreconf (Option 11)
+    const coreconfBytes = new TextEncoder().encode('coreconf');
+    options.push(0xB0 + coreconfBytes.length); // Option 11, dynamic length
+    options.push(...coreconfBytes);
+    
+    // Add Uri-Path: data (Option 11, delta 0)
+    const dataBytes = new TextEncoder().encode('data');
+    options.push(0x00 + dataBytes.length); // Same option, delta 0
+    options.push(...dataBytes);
+
+    // Add YANG path if provided (Option 11, delta 0)
+    if (uri && uri !== '/' && uri !== '') {
+      const yangPath = uri.replace(/^\//, '');
+      if (yangPath) {
+        const pathBytes = new TextEncoder().encode(yangPath);
+        if (pathBytes.length <= 12) {
+          options.push(0x00 + pathBytes.length);
+        } else {
+          options.push(0x0D);
+          options.push(pathBytes.length - 13);
+        }
+        options.push(...pathBytes);
+      }
+    }
+
+    // Add Content-Format if payload exists (Option 12)
+    if (payload) {
+      options.push(0x11); // Option 12 (delta 1), length 1
+      options.push(0x6E); // application/yang-data+cbor (110)
+    }
+
+    // Combine message
+    let message = new Uint8Array(header.length + options.length + (payload ? payload.length + 1 : 0));
+    message.set(header);
+    message.set(new Uint8Array(options), header.length);
+
+    if (payload) {
+      message[header.length + options.length] = 0xFF; // Payload marker
+      message.set(payload, header.length + options.length + 1);
+    }
+
+    return message;
+  }
+
+  parseMessage(data) {
+    if (data.length < 4) return null;
+
+    const version = (data[0] >> 6) & 0x03;
+    const type = (data[0] >> 4) & 0x03;
+    const tokenLength = data[0] & 0x0F;
+    const code = data[1];
+    const messageId = (data[2] << 8) | data[3];
+
+    // Skip token and find payload
+    let i = 4 + tokenLength;
+    let payload = null;
+
+    // Skip options to find payload marker
+    while (i < data.length && data[i] !== 0xFF) {
+      if (data[i] === 0) break;
+      const optionDelta = (data[i] >> 4) & 0x0F;
+      const optionLength = data[i] & 0x0F;
+      i += 1 + optionLength;
+    }
+
+    if (i < data.length && data[i] === 0xFF) {
+      payload = data.slice(i + 1);
+    }
+
+    return {
+      version,
+      type,
+      tokenLength,
+      code: `${(code >> 5)}.${(code & 0x1F).toString().padStart(2, '0')}`,
+      messageId,
+      payload
+    };
+  }
+}
+
+// ==================== Enhanced CBOR Codec ====================
+class CborCodec {
+  encode(obj) {
+    if (obj === null) return new Uint8Array([0xF6]);
+    if (obj === undefined) return new Uint8Array([0xF7]);
+    if (typeof obj === 'boolean') return new Uint8Array([obj ? 0xF5 : 0xF4]);
+    
+    if (typeof obj === 'number') {
+      if (Number.isInteger(obj) && obj >= 0) {
+        if (obj < 24) return new Uint8Array([obj]);
+        if (obj < 256) return new Uint8Array([0x18, obj]);
+        if (obj < 65536) return new Uint8Array([0x19, (obj >> 8) & 0xFF, obj & 0xFF]);
+        return new Uint8Array([0x1A, (obj >> 24) & 0xFF, (obj >> 16) & 0xFF, (obj >> 8) & 0xFF, obj & 0xFF]);
+      }
+    }
+    
+    if (typeof obj === 'string') {
+      const bytes = new TextEncoder().encode(obj);
+      const result = [];
+      if (bytes.length < 24) {
+        result.push(0x60 | bytes.length);
+      } else if (bytes.length < 256) {
+        result.push(0x78, bytes.length);
+      } else {
+        result.push(0x79, (bytes.length >> 8) & 0xFF, bytes.length & 0xFF);
+      }
+      result.push(...bytes);
+      return new Uint8Array(result);
+    }
+    
+    if (Array.isArray(obj)) {
+      const result = [];
+      if (obj.length < 24) {
+        result.push(0x80 | obj.length);
+      } else {
+        result.push(0x98, obj.length);
+      }
+      for (const item of obj) {
+        const encoded = this.encode(item);
+        result.push(...encoded);
+      }
+      return new Uint8Array(result);
+    }
+    
+    if (typeof obj === 'object') {
+      const keys = Object.keys(obj);
+      const result = [];
+      
+      if (keys.length < 24) {
+        result.push(0xA0 | keys.length);
+      } else {
+        result.push(0xB8, keys.length);
+      }
+      
+      for (const key of keys) {
+        // Encode key (could be SID number or string)
+        const keyEncoded = this.encode(isNaN(key) ? key : parseInt(key));
+        result.push(...keyEncoded);
+        
+        // Encode value
+        const valueEncoded = this.encode(obj[key]);
+        result.push(...valueEncoded);
+      }
+      
+      return new Uint8Array(result);
+    }
+    
+    return new Uint8Array([0xF6]); // null as fallback
+  }
+
+  decode(data) {
+    if (!data || data.length === 0) return null;
+    
+    let pos = 0;
+    
+    const readValue = () => {
+      if (pos >= data.length) return null;
+      
+      const byte = data[pos++];
+      const majorType = byte >> 5;
+      const additionalInfo = byte & 0x1F;
+      
+      switch (majorType) {
+        case 0: // Unsigned integer
+          return this.readInteger(additionalInfo);
+          
+        case 1: // Negative integer
+          return -1 - this.readInteger(additionalInfo);
+          
+        case 3: // Text string
+          const textLen = this.readInteger(additionalInfo);
+          const textBytes = data.slice(pos, pos + textLen);
+          pos += textLen;
+          return new TextDecoder().decode(textBytes);
+          
+        case 4: // Array
+          const arrayLen = this.readInteger(additionalInfo);
+          const array = [];
+          for (let i = 0; i < arrayLen; i++) {
+            array.push(readValue());
+          }
+          return array;
+          
+        case 5: // Map
+          const mapLen = this.readInteger(additionalInfo);
+          const result = {};
+          for (let i = 0; i < mapLen; i++) {
+            const key = readValue();
+            const value = readValue();
+            result[key] = value;
+          }
+          return result;
+          
+        case 7: // Simple/Float
+          if (additionalInfo === 20) return false;
+          if (additionalInfo === 21) return true;
+          if (additionalInfo === 22) return null;
+          if (additionalInfo === 23) return undefined;
+          break;
+      }
+      return null;
+    };
+    
+    return readValue();
+  }
+  
+  readInteger(additionalInfo) {
+    if (additionalInfo < 24) return additionalInfo;
+    if (additionalInfo === 24) return data[pos++];
+    if (additionalInfo === 25) {
+      const result = (data[pos] << 8) | data[pos + 1];
+      pos += 2;
+      return result;
+    }
+    if (additionalInfo === 26) {
+      const result = (data[pos] << 24) | (data[pos + 1] << 16) | (data[pos + 2] << 8) | data[pos + 3];
+      pos += 4;
+      return result;
+    }
+    return 0;
+  }
+}
+
+// ==================== Serial Communication ====================
+async function connectDevice() {
+  try {
+    if (!navigator.serial) {
+      alert('Web Serial API not supported');
+      return;
+    }
+
+    port = await navigator.serial.requestPort({
+      filters: [{ usbVendorId: 0x04D8 }] // Microchip vendor ID
+    });
+
+    await port.open({
+      baudRate: 115200,
+      dataBits: 8,
+      stopBits: 1,
+      parity: 'none',
+      flowControl: 'none'
+    });
+
+    reader = port.readable.getReader();
+    writer = port.writable.getWriter();
+
+    isConnected = true;
+    coapModeActive = false;
+    receivedBuffer = new Uint8Array();
+    updateConnectionStatus();
+
+    // Start reading loop
+    readLoop();
+
+    // Send ping to test connection
+    await sendPing();
+
+  } catch (error) {
+    alert('Connection failed: ' + error.message);
+  }
+}
+
+async function disconnectDevice() {
+  if (reader) {
+    await reader.cancel();
+    reader = null;
+  }
+  if (writer) {
+    writer.releaseLock();
+    writer = null;
+  }
+  if (port) {
+    await port.close();
+    port = null;
+  }
+  
+  isConnected = false;
+  coapModeActive = false;
+  updateConnectionStatus();
+}
+
+function updateConnectionStatus() {
+  const statusDot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+  const connectBtn = document.getElementById('connectBtn');
+  const disconnectBtn = document.getElementById('disconnectBtn');
+
+  if (isConnected) {
+    statusDot.classList.add('connected');
+    statusText.textContent = coapModeActive ? 'Connected (CoAP)' : 'Connected';
+    connectBtn.style.display = 'none';
+    disconnectBtn.style.display = 'inline-block';
+  } else {
+    statusDot.classList.remove('connected');
+    statusText.textContent = 'Disconnected';
+    connectBtn.style.display = 'inline-block';
+    disconnectBtn.style.display = 'none';
+  }
+}
+
+async function readLoop() {
+  while (reader) {
+    try {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      // Append to buffer
+      const newBuffer = new Uint8Array(receivedBuffer.length + value.length);
+      newBuffer.set(receivedBuffer);
+      newBuffer.set(value, receivedBuffer.length);
+      receivedBuffer = newBuffer;
+
+      await processReceivedData();
+
+    } catch (error) {
+      console.error('Read error:', error);
+      break;
+    }
+  }
+}
+
+async function processReceivedData() {
+  if (!coapModeActive) {
+    // In MUP1 mode, look for complete text frames ending with \\n
+    const decoder = new TextDecoder();
+    const text = decoder.decode(receivedBuffer);
+    
+    let processedLength = 0;
+    const lines = text.split('\\n');
+    
+    for (let i = 0; i < lines.length - 1; i++) {
+      const line = lines[i].trim();
+      if (line) {
+        await handleMUP1Frame(line);
+        processedLength += lines[i].length + 1; // +1 for \\n
+      }
+    }
+    
+    // Keep remaining data in buffer
+    if (processedLength > 0) {
+      receivedBuffer = receivedBuffer.slice(processedLength);
+    }
+  } else {
+    // In CoAP mode, try to parse binary CoAP messages
+    // CoAP messages start with version bits (01) in first byte
+    let offset = 0;
+    
+    while (offset < receivedBuffer.length) {
+      // Check if we have a potential CoAP message
+      if (receivedBuffer[offset] === 0x40 || receivedBuffer[offset] === 0x50) {
+        try {
+          // Try to parse as CoAP
+          const response = coap.parseMessage(receivedBuffer.slice(offset));
+          if (response) {
+            await handleCoapResponse(response);
+            // For now, consume all remaining data
+            receivedBuffer = new Uint8Array();
+            break;
+          }
+        } catch (error) {
+          console.warn('CoAP parse error:', error);
+        }
+      }
+      
+      // Also check for MUP1 framed responses (device might still frame some responses)
+      const decoder = new TextDecoder();
+      try {
+        const text = decoder.decode(receivedBuffer.slice(offset));
+        if (text.startsWith('>')) {
+          const endPos = text.indexOf('\\n');
+          if (endPos > 0) {
+            const frame = text.substring(0, endPos);
+            await handleMUP1Frame(frame);
+            offset += endPos + 1;
+            continue;
+          }
+        }
+      } catch (e) {
+        // Not valid text, continue
+      }
+      
+      offset++;
+    }
+    
+    // Clean up buffer if we processed anything
+    if (offset > 0) {
+      receivedBuffer = receivedBuffer.slice(offset);
+    }
+  }
+}
+
+// ==================== Protocol Handlers ====================
+const mup1 = new MUP1Protocol();
+const coap = new CoapProtocol();
+const cbor = new CborCodec();
+
+async function sendPing() {
+  if (!writer) return;
+  
+  const frame = mup1.createPingFrame();
+  await writer.write(new TextEncoder().encode(frame));
+  logMessage('SEND', 'PING', 0, frame.length, 'Device ping');
+}
+
+async function enterCoapMode() {
+  if (coapModeActive || !writer) return;
+
+  const frame = mup1.createCoapInitFrame();
+  await writer.write(new TextEncoder().encode(frame));
+  
+  // Wait for mode change confirmation
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  coapModeActive = true;
+  logMessage('SEND', 'COAP_INIT', 0, frame.length, 'Entering CoAP mode');
+  updateConnectionStatus();
+  
+  return true;
+}
+
+async function sendCoapRequest(method, uri, payload = null) {
+  await enterCoapMode();
+  
+  const message = coap.buildMessage(method, uri, payload);
+  await writer.write(message);
+  
+  const requestId = coap.messageId - 1;
+  logMessage('SEND', method, requestId, message.length, `${method} ${uri}`);
+  
+  // Store pending request for response matching
+  pendingRequests.set(requestId, { method, uri, timestamp: Date.now() });
+  
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      pendingRequests.delete(requestId);
+      reject(new Error('Request timeout'));
+    }, 15000);
+    
+    // Store the resolve/reject functions for this request
+    const request = pendingRequests.get(requestId);
+    if (request) {
+      request.resolve = resolve;
+      request.reject = reject;
+      request.timeout = timeout;
+    }
+  });
+}
+
+async function handleMUP1Frame(frameText) {
+  const frame = mup1.parseFrame(frameText);
+
+  if (frame.type === 'ping-response') {
+    const info = frame.data.split(' ');
+    logMessage('RECV', 'PING_RESP', null, frameText.length, `Device: ${info[0]}`);
+  } else if (frame.type === 'coap-init-response') {
+    logMessage('RECV', 'COAP_INIT', null, frameText.length, 'CoAP mode acknowledged');
+    coapModeActive = true;
+    updateConnectionStatus();
+  } else {
+    logMessage('RECV', 'MUP1', null, frameText.length, frameText.trim());
+  }
+}
+
+async function handleCoapResponse(response) {
+  if (response && response.messageId !== undefined) {
+    // Find matching request
+    const request = pendingRequests.get(response.messageId);
+    if (request) {
+      clearTimeout(request.timeout);
+      pendingRequests.delete(response.messageId);
+      
+      logMessage('RECV', 'COAP_RESP', response.messageId, 0, 
+                `Code: ${response.code}, Payload: ${response.payload ? response.payload.length + ' bytes' : 'none'}`);
+      
+      if (request.resolve) {
+        request.resolve(response);
+      }
+    } else {
+      logMessage('RECV', 'COAP_RESP', response.messageId, 0, 'Unmatched response');
+    }
+  }
+}
+
+// ==================== Test Functions ====================
+async function testCoapMode() {
+  if (!isConnected) {
+    alert('Please connect to device first');
+    return;
+  }
+
+  const results = document.getElementById('testResults');
+  results.value = 'Testing CoAP mode...\\n';
+
+  try {
+    await enterCoapMode();
+    results.value += 'CoAP mode activated successfully\\n';
+    results.value += `CoAP Mode Active: ${coapModeActive}\\n`;
+  } catch (error) {
+    results.value += `Error: ${error.message}\\n`;
+  }
+}
+
+async function testGetInterfaces() {
+  if (!isConnected) {
+    alert('Please connect to device first');
+    return;
+  }
+
+  const results = document.getElementById('testResults');
+  results.value = 'Testing GET interfaces...\\n';
+
+  try {
+    const response = await sendCoapRequest('GET', '/ietf-interfaces:interfaces');
+    results.value += `Response Code: ${response.code}\\n`;
+    results.value += `Payload Length: ${response.payload ? response.payload.length : 0}\\n`;
+    
+    if (response.payload) {
+      try {
+        const decoded = cbor.decode(response.payload);
+        const mapped = mapSidsToYang(decoded);
+        results.value += `Decoded Data: ${JSON.stringify(mapped, null, 2)}\\n`;
+      } catch (decodeError) {
+        results.value += `CBOR decode error: ${decodeError.message}\\n`;
+        results.value += `Raw payload (hex): ${Array.from(response.payload).map(b => b.toString(16).padStart(2, '0')).join(' ')}\\n`;
+      }
+    }
+  } catch (error) {
+    results.value += `Error: ${error.message}\\n`;
+  }
+}
+
+async function testGetSystem() {
+  if (!isConnected) {
+    alert('Please connect to device first');
+    return;
+  }
+
+  const results = document.getElementById('testResults');
+  results.value = 'Testing GET system...\\n';
+
+  try {
+    const response = await sendCoapRequest('GET', '/ietf-system:system');
+    results.value += `Response Code: ${response.code}\\n`;
+    results.value += `Payload Length: ${response.payload ? response.payload.length : 0}\\n`;
+    
+    if (response.payload) {
+      try {
+        const decoded = cbor.decode(response.payload);
+        const mapped = mapSidsToYang(decoded);
+        results.value += `Decoded Data: ${JSON.stringify(mapped, null, 2)}\\n`;
+      } catch (decodeError) {
+        results.value += `CBOR decode error: ${decodeError.message}\\n`;
+      }
+    }
+  } catch (error) {
+    results.value += `Error: ${error.message}\\n`;
+  }
+}
+
+// ==================== Configuration Functions ====================
+async function getConfig() {
+  if (!isConnected || !selectedPath) {
+    alert('Please connect device and select a path');
+    return;
+  }
+
+  try {
+    const response = await sendCoapRequest('GET', selectedPath);
+    
+    if (response.payload) {
+      const decoded = cbor.decode(response.payload);
+      const mapped = mapSidsToYang(decoded);
+      document.getElementById('configData').value = JSON.stringify(mapped, null, 2);
+    }
+  } catch (error) {
+    alert('Failed to get configuration: ' + error.message);
+  }
+}
+
+async function setConfig() {
+  if (!isConnected || !selectedPath) {
+    alert('Please connect device and select a path');
+    return;
+  }
+
+  try {
+    const configData = document.getElementById('configData').value;
+    const jsonData = JSON.parse(configData);
+    const sidData = yangToSid(jsonData);
+    const cborPayload = cbor.encode(sidData);
+    
+    const response = await sendCoapRequest('PUT', selectedPath, cborPayload);
+    alert('Configuration updated successfully');
+  } catch (error) {
+    alert('Failed to set configuration: ' + error.message);
+  }
+}
+
+// ==================== Raw CoAP Functions ====================
+async function sendRawCoap() {
+  if (!isConnected) {
+    alert('Please connect device first');
+    return;
+  }
+
+  const method = document.getElementById('coapMethod').value;
+  const uri = document.getElementById('coapUri').value;
+  const payloadHex = document.getElementById('coapPayload').value.trim();
+
+  let payload = null;
+  if (payloadHex) {
+    try {
+      const hexBytes = payloadHex.replace(/\\s+/g, '').match(/.{2}/g);
+      payload = new Uint8Array(hexBytes.map(h => parseInt(h, 16)));
+    } catch (error) {
+      alert('Invalid CBOR hex payload');
+      return;
+    }
+  }
+
+  try {
+    const response = await sendCoapRequest(method, uri, payload);
+    logMessage('INFO', 'COAP_RESP', null, 0, `Response: ${response.code}`);
+    
+    if (response.payload) {
+      try {
+        const decoded = cbor.decode(response.payload);
+        logMessage('INFO', 'CBOR_DATA', null, 0, JSON.stringify(decoded));
+      } catch (e) {
+        logMessage('INFO', 'RAW_DATA', null, 0, 'Binary payload: ' + response.payload.length + ' bytes');
+      }
+    }
+  } catch (error) {
+    alert('CoAP request failed: ' + error.message);
+  }
+}
+
+// ==================== Utility Functions ====================
+function logMessage(direction, type, msgId, length, data) {
+  const logOutput = document.getElementById('logOutput');
+  const time = new Date().toLocaleTimeString();
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+
+  entry.innerHTML = `
+    <span class="log-time">${time}</span>
+    <span class="log-direction ${direction.toLowerCase()}">${direction}</span>
+    <span class="log-type">${type}</span>
+    <span class="log-data">${msgId ? `[${msgId}] ` : ''}(${length}B) ${data}</span>
+  `;
+
+  logOutput.appendChild(entry);
+  logOutput.scrollTop = logOutput.scrollHeight;
+}
+
+// SID Mapping Functions
+function yangToSid(data) {
+  const result = {};
+  
+  for (const [key, value] of Object.entries(data)) {
+    let sidKey = key;
+    
+    // Find SID for this YANG path
+    for (const [sid, yangPath] of Object.entries(window.yangSidMap || {})) {
+      if (yangPath === key || yangPath.includes(key) || key.includes(yangPath)) {
+        sidKey = parseInt(sid);
+        break;
+      }
+    }
+    
+    result[sidKey] = value;
+  }
+  
+  return result;
+}
+
+function mapSidsToYang(data) {
+  if (!data || typeof data !== 'object') return data;
+  
+  const result = {};
+  
+  for (const [key, value] of Object.entries(data)) {
+    const yangPath = window.yangSidMap?.[key] || key;
+    result[yangPath] = typeof value === 'object' ? mapSidsToYang(value) : value;
+  }
+  
+  return result;
+}
+
+// ==================== Tab Management ====================
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    // Update tab appearance
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+
+    // Show corresponding content
+    document.querySelectorAll('#monitorTab, #configTab, #rawTab, #testTab').forEach(content => {
+      content.style.display = 'none';
+    });
+
+    const tabName = tab.dataset.tab;
+    document.getElementById(tabName + 'Tab').style.display = 'block';
+  });
+});
+
+// Tree item selection
+document.querySelectorAll('.tree-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.tree-item').forEach(i => i.classList.remove('selected'));
+    item.classList.add('selected');
+    selectedPath = item.dataset.path;
+    document.getElementById('configPath').value = selectedPath;
+  });
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  logMessage('INFO', 'INIT', null, 0, 'VelocityDRIVE-SP Web Control initialized');
+  logMessage('INFO', 'SID_MAP', null, 0, `Loaded ${Object.keys(window.yangSidMap || {}).length} SID mappings`);
+});
+</script>
+</body>
+</html>

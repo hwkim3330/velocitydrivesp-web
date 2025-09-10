@@ -4,7 +4,7 @@ Microchip VelocityDRIVE-SP (LAN9662) Web Control Interface with CoAP/CORECONF pr
 
 ## Overview
 
-This repository contains the extracted web interface from Microchip VelocityDRIVE CT-UI application. It provides browser-based control for the LAN9662 TSN switch via USB serial communication using the MUP1 (Microchip UART Protocol #1) protocol.
+This repository contains the extracted web interface from Microchip VelocityDRIVE CT-UI application (v2025.07.12). It provides browser-based control for the LAN9662 TSN switch via USB serial communication using the MUP1 (Microchip UART Protocol #1) protocol.
 
 ## Architecture
 
@@ -27,12 +27,12 @@ Application Layer (Browser)
 
 #### CoAP Protocol
 - **RFC 7252** - The Constrained Application Protocol (CoAP)
-- **RFC 8132** - PATCH and FETCH Methods for CoAP
-- **RFC 9177** - CoAP Content-Formats Registry
+- **RFC 8132** - PATCH and FETCH Methods for CoAP (FETCH: 0.05, PATCH: 0.07, iPATCH: 0.08)
+- **RFC 9177** - CoAP Content-Formats Registry (application/yang-data+cbor = 60)
 
 #### CBOR/YANG Serialization
-- **RFC 8949** - Concise Binary Object Representation (CBOR)
-- **RFC 8742** - YANG Schema Item iDentifier (SID)
+- **RFC 8949** - Concise Binary Object Representation (CBOR) - Major Types 0-7
+- **RFC 8742** - YANG Schema Item iDentifier (SID) - Numeric ID mapping for YANG nodes
 - **RFC 8070** - YANG-CBOR mapping rules
 
 #### Management Protocol
@@ -61,6 +61,11 @@ Frame format: `>TYPE[DATA]<[<]CHECKSUM`
 
 - **Start**: `>` (0x3E)
 - **Type**: Single byte message type
+  - `p` - Ping
+  - `P` - Pong (response)
+  - `c` - Enter CoAP mode
+  - `C` - CoAP mode acknowledgment
+  - `t` - Trace message
 - **Data**: Variable length payload
 - **End**: `<` (0x3C) or `<<` for extended
 - **Checksum**: XOR of all bytes
@@ -69,10 +74,16 @@ Frame format: `>TYPE[DATA]<[<]CHECKSUM`
 
 ```
 /app                    - Electron main process
+  /api                  - Electron API modules
+  main.js              - Main application entry
+  package.json         - Node dependencies
 /wwwroot               - Angular web application
   /UserGuide           - Documentation
   /keys                - YANG SID mappings
   /downloads           - Downloadable resources
+    /coreconf          - YANG modules and SID files
+  index.html           - Main web interface
+  *.js, *.css          - Application assets
 ```
 
 ## Hardware Requirements
@@ -88,13 +99,21 @@ Frame format: `>TYPE[DATA]<[<]CHECKSUM`
 - Data bits: 8
 - Stop bits: 1
 - Parity: None
+- Flow control: None
+
+## Supported YANG Modules
+
+The application includes complete SID mappings for 40+ YANG modules including:
+- IETF standards (interfaces, system, routing, IP, hardware)
+- IEEE standards (802.1Q bridge, PTP, LLDP, TSN extensions)
+- Microchip proprietary (velocitysp-system, vcap, port extensions)
 
 ## Technologies
 
 - **Frontend**: Angular, TypeScript
-- **Backend**: Electron, Node.js
+- **Backend**: Electron, Node.js, Socket.IO
 - **Protocols**: CoAP, CBOR, MUP1
-- **Standards**: IEEE 802.1 TSN, YANG/NETCONF
+- **Standards**: IEEE 802.1 TSN, YANG/NETCONF/CORECONF
 
 ## License
 
