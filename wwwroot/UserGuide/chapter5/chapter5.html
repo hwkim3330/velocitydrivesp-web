@@ -1,0 +1,567 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="../guide.css">
+    </head>
+    <body>
+        <div class="chapter">
+            <h1>Configuration Use Cases</h1>
+
+            <div class="chapter-content">
+                <div class="chapter-division">
+                    <h2>Introduction</h2>
+                    <p>
+                        This chapter provides information on several common configuration use cases.
+                    </p>
+                </div>
+
+                <div class="chapter-division" id="coap">
+                    <h2>Enabling CoAP over UDP</h2>
+                    <p>
+                        Connecting to a device over Constrained Application Protocol (CoAP) can be advantageous.
+                        Please use the following steps to enable CoAP connections using User Datagram Protocol (UDP).
+                    </p>
+
+                    <div class="chapter-subdivision">
+                        <h3>Initial Setup</h3>
+                        <p>
+                            Follow the steps to connect your device to the PC using a USB cable
+                            (see See Connecting a Device to VelocityDRIVE CT) and create a default Full Datastore
+                            configuration (see
+                            See Full Datastore Configuration).
+                        </p>
+                    </div>
+
+                    <div class="chapter-subdivision">
+                        <h3>CoAP Configuration</h3>
+                        <div class="img-container">
+                            <img src="UseCases_CoAPConfig.png" alt="">
+                            <p class="img-caption">Figure 5-1: CoAP YANG Catalog PATH</p>
+                        </div>
+                        <p>
+                            In the Configuration tab, navigate to the /mchp-velocitysp-system:coap-server/config container.
+                            You will
+                            see that the
+                            security-mode (enumeration) leaf is set to raw-public-key. Toggle the security-mode to no-sec.
+
+                            At the top of the Configuration tab address bar, navigate back to the /(root) container. Save
+                            the
+                            current configuration
+                            as part of the Startup Datastore by clicking the Upload button in the bottom Devices tab.
+
+                            Reboot the device by tapping the reset button once (do not power cycle board, as the new Startup
+                            Configuration will be
+                            lost).
+
+                            Then, confirm the change has been made by selecting the switch in the Device tab, and then
+                            navigating to
+                            the /
+                            mchp-velocitysp-system:coap-server/config container. The value of the security-mode leaf on the
+                            Device
+                            should now be
+                            no-sec, indicating that the device is configured to use CoAP over UDP without any security
+                            options.
+
+                            If the value did not appear to change on the Device, use the Refresh button to the right of the
+                            value
+                            to send a FETCH command to obtain the current value (see See YANG Catalog Navigation Layout and
+                            Symbols
+                            - Devices Tab
+                            for more details).
+                            Next, return to the Configuration tab and navigate to / ietf-interfaces:interfaces/interface.
+                            Delete all
+                            present
+                            interfaces (name=1, name=2, AGGR1, etc.).
+
+                            Use the Add Item button . Open interface:name=_ and for the Value in the name (string) row of
+                            the main
+                            panel, delete the
+                            dash and add L3V1.
+
+                            In the Left Panel, use the Clear button to remove all children nodes.
+
+                            Then in the below YANG Elements selection sidebar menu, select ietf-ip:ipv4 and use the Add
+                            Selected
+                            button to add it
+                            back as a child node. Click on ietf-ip:ipv4, bringing you to an empty address container. Select
+                            it, and
+                            then use the Add
+                            Item button once again.
+
+                            The empty address container should now read address: ip=0.0.0.0. Click on it, which will open a
+                            main
+                            panel with a leaf
+                            named ip (inet:ipv4-address-no-zone → string). Inside the empty IP address value in the main
+                            panel,
+                            enter the address of
+                            your choosing, in accordance with your local Ethernet Network.
+
+                            Return to the /(root) location of your configuration to add these new parameters to the Start-up
+                            Datastore by clicking
+                            the Upload button in the Devices dashboard.
+
+                            Then, reboot the device by tapping the reset button once (do not power cycle board, as the new
+                            Startup
+                            Configuration
+                            will be lost).
+
+                            Confirm the change by visiting the /
+                            ietf-interfaces:interfaces/interface/interface:name=L3V1/ietf-ip:ipv4/address
+                            location on your Device. You will see that the iPatch command only synced the interface you were
+                            adding,
+                            and did not
+                            make changes to the other interfaces in the catalog. Removing the unchanged interfaces from the
+                            same
+                            branch level in
+                            your configuration ensures the Patch change is isolated to only this single addition.
+
+                            If you receive a syncing error, return to your Configuration. Navigate to /
+                            ieee802-dot1q-bridge:bridges/bridge/bridge:
+                            name=b0/component/component: name=c0/filtering-database/filtering-entries and use the Clear
+                            button to
+                            remove them. Then
+                            navigate back to the /
+                            ietf-interfaces:interfaces/interface/interface:name=L3V1/ietf-ip:ipv4/address
+                            location and Sync
+                            again.
+
+                            Next, using your PC's terminal, ping the IP address you assigned to your switch. Once
+                            successful, you
+                            may add the
+                            Device's network connection in the Devices tab.
+                        </p>
+
+                        <div class="img-container">
+                            <img src="UseCases_ConnectProvision.png" alt="In the devices tab, click the Add button">
+                            <p class="img-caption">Figure 5-2: Connecting a Provisioned Device</p>
+                        </div>
+                        <ol>
+                            <li>
+                                In the Devices tab, click the Add button .
+                            </li>
+                            <li>
+                                In the provided box, enter
+                                <pre>coap://</pre> followed by the IP address on your network.
+                            </li>
+                        </ol>
+
+                        <div class="img-container">
+                            <img src="UseCases_Connected.png" alt="">
+                            <p class="img-caption">Figure 5-3: Device Connected</p>
+                        </div>
+                        <p>
+                            You will see the new Device card appear with its corresponding CoAP device address.
+                            Using the terminal on your PC, ping the IP address once again to be sure. Then lastly, save the
+                            Project
+                            file to bundle
+                            the Device CoAP entry and your Configuration file together.
+                            You may now disconnect the USB cable. Close and relaunch VelocityDRIVE CT and then open the
+                            Project file
+                            to see the
+                            result similar to See CoAP Connected.
+                        </p>
+                        <div class="img-container">
+                            <img src="CoAP_Connected.png" alt="">
+                            <p class="img-caption">Figure 5-4: CoAP Connected</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chapter-division" id="vlan">
+                    <h2>Adding VLAN IDs to the VLAN Table</h2>
+                    <p>
+                        VLAN Registration Entries are designed to model operations performed on a single Registration Entry
+                        by using
+                        the Filtering Database (FDB).
+                        In this example, two VLAN IDs will be added
+                    </p>
+
+                    <div class="chapter-subdivision">
+                        <h3>Initial Setup</h3>
+                        <p>
+                            Create a default Full Datastore configuration of your target Device (see See Full Datastore
+                            Configuration)
+                        </p>
+                    </div>
+
+                    <div class="chapter-subdivision">
+                        <h3>VLAN ID Configuration</h3>
+                        <div class="img-container">
+                            <img src="UseCases_VLAN-IDYANGPath.png" alt="">
+                            <p class="img-caption">Figure 5-5: VLAN ID YANG Path</p>
+                        </div>
+                        <ol>
+                            <li>
+                                Navigate to the YANG path where the changes will be made
+                                <p>
+                                <pre>
+                                            / (root) / bridges > bridge > bridge[name='b0'] > component > component[name='c0']
+            > filtering-database / vlan-registration-entry
+                                        </pre>
+                                </p>
+                            </li>
+                            <li>
+                                Click Add Item button twice so there is a total of three VIDs in the
+                                configuration.
+                                <p>
+                                    Note: Numerical values may be blank for each VID. Open each element and
+                                    change the dash present in the VIDs value so that the elements are named
+                                    vids=’1’, vids=’2’, and vids=’3’.
+                                </p>
+                            </li>
+                            <li>
+                                In the lower left Devices dashboard, click the Apply button to temporarily
+                                apply the VID changes to the desired device.
+                            </li>
+                            <li>
+                                Note the successful update message at the bottom of the interface.
+                            </li>
+                        </ol>
+                        <div class="img-container">
+                            <img src="UseCases_VLAN-IDVerfication.png" alt="">
+                            <p class="img-caption">Figure 5-6: VLAN ID Addition Verification</p>
+                        </div>
+                        <p>
+                            To verify your change, visit the same address in the Devices tab and confirm that your
+                            vlan-registration-entry has vids=2, vid2=3 added.
+                        </p>
+                        <p>
+                            Information on creating additional YANG configuration changes such as
+                            VLAN-EGRESS-PORTS, VLAN-UNTAGGED-PORTS, and
+                            VLAN-PORT-VID can be found in Appendix B. “YANG File Paths for Typical
+                            L2 Settings”.
+                        </p>
+                        <p>
+                            Return to the /(root) of your Configuration and finalize the addition of the VLAN IDs to
+                            the Start-up Datastore by clicking the Upload button in the Devices dashboard.
+                            Then press your switch’s reset button, as per the pop-up message.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="chapter-division" id="cbs">
+                    <h2>Credit Based Shaper</h2>
+                    <p>
+                        Credit Based shapers are disabled by default. They can be enabled on a per interface, per queue,
+                        basis.
+                        An overview of this concept can be read in See Credit Based Shaper.
+                    </p>
+
+                    <div class="chapter-subdivision">
+                        <h3>Initial Setup</h3>
+                        <p>
+                            Create a default Full Datastore configuration of your current desired Device (see See Full
+                            Datastore
+                            Configuration).
+                        </p>
+                    </div>
+
+                    <div class="chapter-subdivision">
+                        <h3>Configuring Credit Based Shaper Idle-Slope</h3>
+                        <div class="img-container">
+                            <img src="CreditBasedShaperIdleSlope_1.png" alt="">
+                            <p class="img-caption">Figure 5-7: Enabling Credit Based Shaper</p>
+                        </div>
+                        <p>
+                            In your Configuration, navigate to / (root) / ietf-interfaces:interfaces > interface >
+                            interface: name=1
+                            >
+                            mchp-velocitysp-port:eth-qos > config > traffic-class-shapers / traffic-class-shapers:
+                            traffic-class=0
+
+                            If the traffic-class-shapers[traffic-class=’0’] element is not present, choose the Add Item
+                            button. Open the newly added element and add the credit-based Enable shaper by
+                            choosing CREDIT for the type field under the Value column. Then in the left panel, open
+                            the credit-based container
+                        </p>
+                        <div class="img-container">
+                            <img src="CreditBasedShaperIdleSlope_2.png" alt="">
+                            <p class="img-caption">Figure 5-8: Idle Slope Adjustment</p>
+                        </div>
+                        <p>
+                            The Value for idle-slope (uint32) is currently 0. We must determine the range of idle-slope
+                            values for
+                            this device.
+                            The range requested must not exceed the total port speed in kilobits per second. For example,
+                            here are
+                            calculations for
+                            2 different port speeds.
+                        </p>
+
+                        <h4>1 Gbps Port Speed</h4>
+                        <p>
+                            Port speed 1 Gbps = 1,000,000 kbps. Therefore the range for 1 Gbps = is 0-999,999
+                            kbps. Also, keep in mind that their are 8 traffic class queues per port to divide the max
+                            kilobits per second.
+                        </p>
+
+                        <h4>10Gbps Port Speed</h4>
+                        <p>
+                            Port speed 10 Gbps = 10,000,000 kbps so the max range is 0-9,999,999 kbps
+                        </p>
+
+                        <div class="img-container">
+                            <img src="CreditBasedShaperIdleSlope_YANG_Library.png" alt="">
+                            <p class="img-caption">Figure 5-9: YANG Library Selection</p>
+                        </div>
+                        <p>
+                            Navigate to the YANG Library tab and open the library for your corresponding device.
+                        </p>
+
+                        <div class="img-container">
+                            <img src="" alt="">
+                            <p class="img-caption">Figure 5-10: YANG Library Module</p>
+                        </div>
+                        <p>
+                            Inside the YANG Library, find and open the mchp-velocitysp-port module.
+                        </p>
+
+                        <div class="img-container">
+                            <img src="CreditBasedShaperIdleSlope_3.png" alt="">
+                            <p class="img-caption">Figure 5-11: MCHP-VelocitySP-Port Module</p>
+                        </div>
+                        <p>
+                            Within the mchp-velocitysp-port, find idle-slope which has a range of
+                            0..4294967295. You may then enter the appropriate value for your network design.
+                            See previous example for actual range.
+                        </p>
+                        <p>
+                            Note: Although the model says range is 0..4294967295, keep in mind the range is
+                            actually based on port speed as per previous example.
+                        </p>
+                        <p>
+                            The idle slope parameter in a Credit-Based Shaper (CBS) is crucial for regulating the
+                            transmission rate of Ethernet frames. It determines the rate at which credits are accumulated
+                            when the queue is idle. Adjusting the idle slope effectively manages the bandwidth
+                            allocation for different traffic classes, ensuring a smooth flow of traffic and
+                            preventing congestion.
+                            In the context of IEEE 802.1Qav, which defines CBS, the idle slope is set based on the
+                            desired outgoing data rate of the shaper, measured in kilobits per second. This rate
+                            includes protocol overhead as measured in the Ethernet channel. Typically, this is the
+                            only parameter that needs to be set, as other parameters, such as send slope and
+                            credit limits, have reasonable defaults.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="chapter-division" id="dtls">
+                    <h2>Datagram Transport Layer Security</h2>
+                    <p>
+                        Datagram Transport Layer Security (DTLS) is used to secure the connection between a host and a device, ensuring that the data sent between them is encrypted. Velocity-
+                        DRIVE SP operates DTLS over UDP. DTLS is enabled by default.
+                        Section 5.2 “Enabling CoAP Over UDP” outlines steps for disabling security for an initial
+                        connection over a provision IP address. Using those instructions as a basis, the following
+                        steps outline how to enable a connection with encrypted security, utilizing the
+                        public keys described in Section 3.9 “Settings Tab”.
+                        For secure communication, both participants need a root of trust. In this case, the participants
+                        are the switch and the VelocityDRIVE CT software itself. The root of trust is
+                        established through a shared public key, which VelocityDRIVE CT assigns from the
+                        device. Once this public key is present in the device’s datastore, a secure connection
+                        is allowed.
+                        The steps shown in Section 5.2.3 “Provisioning an IP Address” provide an example of
+                        how to set a valid L3V1 IPv4 IP address within VelocityDRIVE CT. This provisioned IP
+                        must be uploaded to the device as a startup configuration.
+                        Note: The startup configuration’s value of the security-mode leaf found in the
+                        /root/coap-server/config container must be set to raw-public-key for DTLS
+                        to be enabled.
+                        Once the IP has been confirmed on the device, create an initial DTLS connection.
+                        In the Devices tab, use the Add Device button and input the provisioned IP
+                        address using the coaps:// security protocol.              
+                    </p>
+                    <div class="img-container">
+                        <img src="DTLS_COAPS.png" alt="">
+                        <div class="img-caption">Figure 5-12: CoAPS Protocol</div>
+                    </div>
+                    <p>
+                        The connection should be shown automatically
+                    </p>
+
+                    <div class="img-container">
+                        <img src="DTLS_ConnectedDevice.png" alt="">
+                        <div class="img-caption">Figure 5-13: Connected Device Using CoAPS Protocol</div>
+                    </div>
+                    <p>
+                        In the Log tab, we can see that initializing a DTLS session prompts the software to recognize
+                        that security keys are not yet present. VelocityDRIVE CT then creates a new
+                        key for the default 'admin' role and 'admin' username. Several steps later, the software
+                        automatically provisions the device for use with this admin role and key. A DTLS connection
+                        is then successfully established.
+                    </p>
+
+                    <div class="img-container">
+                        <img src="DTLS_LogFile.png" alt="">
+                        <div class="img-caption">Figure 5-14: Admin Role and Key Established</div>
+                    </div>
+                    <p>
+                        Explore this newly connected device in the Devices tab by navigating to /system/
+                        authentication/user/. Figure 5-15 shows that the tool has communicated with the
+                        device to generate a new role, user[name='admin'].
+                    </p>
+
+                    <div class="img-container">
+                        <img src="DTLS_Devices_NewAdmin.png" alt="">
+                        <div class="img-caption">Figure 5-15: Admin Role Created</div>
+                    </div>
+                    <p>
+                        Continuing along the tree to /system/authentication/
+                        user/user[name='admin']/coap-authorized-key/[name='admin'], the admin role
+                        level username “admin” has a key listed under the key-data leaf.
+                    </p>
+
+                    <div class="img-container">
+                        <img src="DTLS_Device_Admin_Key.png" alt="">
+                        <div class="img-caption">Figure 5-16: Connected Device using CoAPS Protocol</div>
+                    </div>
+                    <p>
+                        The default admin key does not need to be saved to a specific configuration; it is stored
+                        in the Settings tab of the tool itself.
+                    </p>
+
+                     <div class="img-container">
+                        <img src="DTLS_Settings_Admin.png" alt="">
+                        <div class="img-caption">Figure 5-17: Settings Tab - Admin User Key Stored</div>
+                    </div>
+                    <p>
+                        In the Settings tab, we can see where this key has been stored in VelocityDRIVE CT.
+                        Observe that it matches the key seen in the device path.
+                        Create a new user in the Settings tab by pressing the New User button ( ).
+                    </p>
+
+                     <div class="img-container">
+                        <img src="DTLS_Device_User1_Key.png" alt="">
+                        <div class="img-caption">Figure 5-18: Settings Tab - New User and Key Created</div>
+                    </div>
+                    <p>
+                        The default new user name is “user1”. Press the Copy button ( ) next to their Public
+                        Key to copy the key to the clipboard.
+                        Create a new configuration in the Configurations tab of the device’s full datastore. In
+                        the configuration, navigate to /system/authentication/
+                        user/user[name=admin]/coap-authorized-key/.
+                    </p>
+
+                    <div class="img-container">
+                        <img src="DTLS_Config_Add_User1.png" alt="">
+                        <div class="img-caption">Figure 5-19: Add New Admin Role Level User</div>
+                    </div>
+                    <p>
+                        At this node on the tree, there is a container named coap-authorized-
+                        key[name='admin’], which represents an admin-level user with the username of
+                        “admin.” Use the Add Item button to create a new username at this admin role level.
+                    </p>
+
+                    <div class="img-container">
+                        <img src="DTLS_Config_Rename.png" alt="">
+                        <div class="img-caption">Figure 5-20: Add New Admin Role Level User</div>
+                    </div>
+                    <p>
+                        Figure 5-20 shows that a new user has been created with the default name “_admin”.
+                        Enter this container and change the default name Value from “_admin” to “user1”,
+                        matching the new username previously generated.
+                    </p>
+
+                    <div class="img-container">
+                        <img src="DTLS_Config_User1_YANG.png" alt="">
+                        <div class="img-caption">Figure 5-21: Rename User and Add Required Elements</div>
+                    </div>
+                    <p>Next, add the access-control and key-data YANG elements from the sidebar</p>
+
+                    <div class="img-container">
+                        <img src="DTLS_Config_User1_KeyValue.png" alt="">
+                        <div class="img-caption">Figure 5-22: Configure New Admin Role Level User</div>
+                    </div>
+                    <p>
+                        Notice that this new username does not yet have a value in the key-data row. Paste
+                        user1’s key copied from the Settings tab into the key-data Value box.
+                        Then, enter the access-control container.
+                    </p>
+
+                    <div class="img-container">
+                        <img src="DTLS_Devices_User_Access.png" alt="">
+                        <div class="img-caption">Figure 5-23: Access Control Settings</div>
+                    </div>
+                    <p>
+                        Add all of the YANG elements from the YANG Elements sidebar and change all of their
+                        Values to read-write to enable full admin role access. Navigate up one tree level.
+                        Use the Apply Configuration button ( ) to temporarily flash this change and return
+                        to the Devices tab.
+                    </p>
+
+                    <div class="img-container">
+                        <img src="DTLS_Devices_User1.png" alt="">
+                        <div class="img-caption">Figure 5-24: Rename User and Add Required Elements</div>
+                    </div>
+                    <p>
+                        Delete the previously connected DTLS connection. Use the Add Device button. In the
+                        URL box, use the COAPS:// protocol, but append the beginning of the provisioned IP
+                        address with the new admin role username, followed by “@”:
+                        coaps://user1@10.1.1.7
+                    </p>
+
+                    <div class="img-container">
+                        <img src="DTLS_Devices_User_connected.png" alt="">
+                        <div class="img-caption">Figure 5-25: Device Connected Via New User</div>
+                    </div>
+                    <p>
+                        The connection should be shown automatically.
+                        Once successfully connected, return to the root of the configuration and use the
+                        Upload button in the bottom Devices tab to add this new user to the startup configuration.
+                        The new admin level user has been successfully added and secure DTLS
+                        connections may be utilized.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="index">
+            <div class="table-of-contents chapter">
+                <h1 class="chapter-h2"><a name="TOC">Table of Contents</h1>
+                <ol role="list">
+                    <li>
+                        <a href="../ToC/table_of_contents.html">
+                            <span>Table of Contents</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../Preface/preface.html">
+                            <span>Preface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter1/chapter1.html">
+                            <span>Chapter 1: Overview</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter2/chapter2.html">
+                            <span>Chapter 2: Installation instructions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter3/chapter3.html">
+                            <span>Chapter 3: User Interface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter4/chapter4.html">
+                            <span>Chapter 4: Configurations</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter5/chapter5.html">
+                            <span>Chapter 5: Configuration Use Cases</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter6/chapter6.html">
+                            <span>Chapter 6: Command Line Tool Interface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter7/chapter7.html">
+                            <span>Chapter 7: Default Configuration Backup Advisory</span>
+                        </a>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </body>
+
+</html>

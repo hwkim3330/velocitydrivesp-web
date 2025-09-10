@@ -1,0 +1,956 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="../guide.css">
+    </head>
+    <body>
+        <div class="chapter">
+            <h1 class="chapter-header">User Interface</h1>
+            <div class="chapter-division">
+                <h2 class="chapter-h2">Introduction</h2>
+                <p>
+                    VelocityDRIVE CT is powered by a feature rich user interface. 
+                    For information on using the software's command line interface, 
+                    please see <a href="">Chapter 6: “Command Line Tool Interface”.</a> 
+                </p>
+                <p>
+                    The major functions of the software's graphic user interface are organized within the top ribbon of the application in a row of tabs
+                    This chapter outlines the functions and navigation of each tab.  
+                </p>
+            </div>
+    
+            <div class="chapter-division">
+                <h2>Devices and Configurations</h2>
+                <p>
+                    Before interacting with the user interface, it is important to understand the underlying
+                    VelocityDRIVE CT workflow.                    
+                </p>
+                <p>
+                    Changes are not made directly to a device’s YANG instances/datastores, but are
+                    instead performed first in a configuration within the Configurations Tab. A configuration
+                    is a set of YANG instances retrieved from the device that are allowed to be modified
+                    by the user. Once retrieved, the user is free to make changes to the instances contained
+                    in the configuration. These changes do not yet affect the switch directly. Once
+                    the user is satisfied with their changes, the revised values in the configuration can
+                    uploaded to the device temporarily by performing a sync. If successful, the tool will
+                    re-read the running datastore of the device. The changed values (and affected YANG
+                    instances) can then be evaluated from the Devices Tab.                   
+                </p>
+                <p>
+                    Explained in a different way, think of the YANG instances displayed in the Devices Tab
+as the current state of the switch (the running datastore). The YANG instances shown
+in the Configurations Tab is a possible state of the switch.                    
+                </p>
+                <p>
+                    To better understand the difference, the following sequence outlines the basic operating
+                    process of VelocityDRIVE CT.                    
+                </p>
+                <ol>
+                    <li>The user connects a valid switch to their PC and opens the VelocityDRIVE CT software. The software will then recognize the device.</li>
+                    <li>Once the device is identified, VelocityDRIVE CT downloads the device's corresponding YANG/CORECONF library.</li>
+                    <li>The library is loaded into the Devices Tab, which is then populated by actual data from the connected switch. This is the current state of the switch.</li>
+                    <li>
+                        Once the YANG instances are retrieved, they may be edited in the Configurations
+                        Tab. A configuration, which can either be a patch to specific YANG instances or
+                        a whole datastore, can be thought of as a possible state of the entire switch or
+                        some specific part of its configuration.
+                    </li>
+                    <li>
+                        Changes made in a configuration will not be seen on the switch until the configuration
+                        is applied to the running datastore. Whole datastore changes can be
+                        saved permanently in the device’s startup memory (only seen on the device after
+                        a reboot command or a push of the reset button). Patches made to the running
+                        datastore are temporary. Patches can be saved permanently, but only as a part
+                        of a whole datastore in the device’s startup memory.
+                    </li>
+                </ol>
+            </div>
+
+            <div class="chapter-division">
+                <h2 class="chapter-h2">Navigation Buttons</h2>
+                <p>
+                    A pair of Navigation buttons  can be found in the top left corner of the VelocityDRIVE™ CT user interface ribbon. 
+                    These backwards and forward navigators can be used to quickly return to previous tabs, screens, and tree structure nodes throughout the software.
+                </p>
+            </div>
+    
+            <div class="chapter-division">
+                <h2 class="chapter-h2">Project Tab</h2>
+                <p>
+                    VelocityDRIVE CT utilizes Project files to store data from Configurations and Devices. 
+                    Fillable fields within the main Project tab are available to annotate an individual Project file's relevant properties and information.
+                </p>
+                <div class="chapter-subdivision">
+                    <h3>Project Menu Definitions</h3>
+
+                    <div class="img-container">
+                        <img src="menu.gif" alt="">
+                        <div class="img-caption">Figure 3-1: VelocityDRIVE CT Project File Menu</div>
+                    </div>
+                    <p>
+                        The Project menu is accessed by clicking on the Menu button , presenting the following
+                        options:                    
+                    </p>
+                    <ul>
+                        <li>
+                            New Project: Creates a new project file with the default name of “New Project.” It
+                            is recommended to change the default project name to a unique identifier.                        
+                        </li>                    
+                        <li>
+                            Open Project: Selects and loads a previously saved Project file.                        
+                        </li>
+                        <li>
+                            Save: Saves the current Project file.                        
+                        </li>
+                        <li>
+                            Save As: Prompts for a new project file name.                        
+                        </li>
+                    </ul>    
+                </div>
+                <div class="chapter-subdivision">
+                    <h3>Project Files</h3>
+
+                    <p>
+                        A saved VelocityDRIVE CT Project file contains:                        
+                    </p>
+                    <ul>
+                        <li>
+                            All Configurations created within the Project                            
+                        </li>
+                        <li>
+                            Remembered Device connection information, which includes:
+                            <ul>
+                                <li>
+                                    Device connection settings (URI)                                    
+                                </li>
+                                <li>
+                                    Last connection settings
+                                </li>
+                                <li>
+                                    Device's YANG Catalog ID Checksum
+                                </li>
+                            </ul>                            
+                        </li>
+                    </ul>
+                </div>
+            </div>
+    
+            <div class="chapter-division">
+                <h2 class="chapter-h2">YANG Library Tab</h2>
+                <p>
+                    When VelocityDRIVE CT recognizes a connected device operating with VelocityDRIVE SP compatible firmware, 
+                    it automatically loads the corresponding YANG library in the YANG Library tab.
+                </p>
+                <div class="chapter-subdivision">
+                    <h3>YANG Library Tab Menu</h3>
+
+                    <div class="img-container">
+                        <img src="library_tab.gif" alt="">
+                        <div class="img-caption">YANG Library Tab Menu</div>
+                    </div>
+                    
+                    <p>
+                        The YANG Library tab displays each YANG library as a separate card. The card contains:
+                    </p>
+                    <ul>
+                        <li>
+                            YANG Library Checksum ID: The checksum ID is a unique identifier for the
+                            YANG library associated with that device's specific hardware and firmware combination.                            
+                        </li>
+                        <li>
+                            Recent Connections: A list of recently connected devices that are associated
+                            with that particular YANG library.
+                        </li>
+                        <li>
+                            Refresh button : If a currently connected device is not present but
+                            should match this YANG library in the Project, the Refresh button can be used to
+                            confirm the Device is present and matches the checksum.                            
+                        </li>
+                        <li>
+                            Open button : Opens that YANG library's element catalog                            
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="chapter-subdivision">
+                    <h3>YANG Library Catalog</h3>
+
+                    <div class="img-container">
+                        <img src="catalog.gif" alt="">
+                        <div class="img-caption">YANG Library Catalog</div>
+                    </div>
+                    <p>
+                        Opening the library from the YANG Library tab to reveals the list of YANG modules.
+                        The catalog is displayed with the following columns of information:                        
+                    </p>
+                    <ol>
+                        <li>
+                            The YANG Library checksum ID that corresponds to the Device and Firmware                            
+                        </li>
+                        <li>
+                            The Name of the YANG Library module.                            
+                        </li>
+                        <li>
+                            The Namespace address in the YANG library tree in which the element can be
+                            found.                            
+                        </li>
+                        <li>
+                            The element’s Prefix value, which acts as a shortcut reference to the module.                            
+                        </li>
+                        <li>
+                            The Organization responsible for maintaining the YANG module’s characteristics.                            
+                        </li>
+                        <li>
+                            That last time the responsible Organization made a Revision to the standards
+                            for this particular element.                            
+                        </li>
+                    </ol>
+
+                    <p>
+                        Note: The values found in items 3-6 are defined by the YANG module itself                      
+                    </p>
+                    <p>
+                        Clicking on the Name of a YANG library element will display its code                        
+                    </p>
+
+                    <div class="img-container">
+                        <img src="module.gif" alt="">
+                        <div class="img-caption">Figure 3-4: YANG Library Element Code</div>
+                        <p>
+                            The code displayed is read-only. Highlighting and copying code elements is allowed,
+                            but it cannot be edited directly                            
+                        </p>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="chapter-division">
+                <h2 class="chapter-h2">Configurations Tab</h2>
+                <p>
+                    The VelocityDRIVE CT Configurations tab displays cards of all Configurations contained within a Project file.
+                </p>
+
+                <div class="chapter-subdivision">
+                    <h3>Configurations Tab Menu</h3>
+
+                    <div class="img-container">
+                        <img src="config_tab.gif" alt="">
+                        <div class="img-caption">Configurations Tab Menu</div>
+                    </div>
+                    <p>
+                        A Configuration represents a whole or partial datastore instance of a YANG library.
+                        Each Configuration is saved within its own card, which is labeled with a user defined
+                        Name and Description.                        
+                    </p>
+                    <ul>
+                        <li>
+                            When VelocityDRIVE CT is first launched, or a new Project file is created
+                            (Section 3.4.1 “Project Menu Definitions”), a blank Configuration card named
+                            “Default” is generated. Inputing a new Configuration name is described in
+                            Section 4.3.3 “Naming VelocityDRIVE CT Configurations”.                            
+                        </li>
+                        <li>
+                            Additional empty Configurations can be created by using the Add button .                            
+                        </li>
+                        <li>
+                            Configurations may be removed by using the Delete button .                            
+                        </li>
+                        <li>
+                            The Open button brings up the Configurations tab YANG Catalog interface.                            
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="chapter-subdivision">
+                    <h3>Configurations Tab Interface</h3>
+                    
+                    <p>
+                        VelocityDRIVE CT provides a familiar breadcrumb style interface to navigate the YANG
+                        Catalog tree. The list of YANG elements are visible in the left sidebar menu. Figure 3-6
+                        outlines the layout and symbols found in the user interface.
+                    </p>
+                    <div class="img-container">
+                        <img src="config-edit.gif" alt="">
+                        <p class="img-caption">Configuration User Interface Panels</p>
+                    </div>
+
+                    <ol>
+                        <li>
+                            <p>
+                                The top navigation address bar displays the tree structure URI. It is interactive;
+                                the address level names act as shortcuts, jumping to previous positions along the
+                                traveled path. Various icons provide context to the tree positions                         
+                            </p>
+                            <ul>
+                                <li>
+                                    A network icon indicates that the path relates to a Configuration.                            
+                                </li>
+                                <li>
+                                    An “arrow down symbol” indicates that there are sibling elements adjacent to
+                                    that element position in the tree structure. Clicking on this button will display a list
+                                    of these siblings; selecting one will jump to its location                            
+                                </li>
+                                <li>
+                                    An “arrow right symbol” indicates that the node is singular and has no adjacent
+                                    siblings on the path.                            
+                                </li>
+                                <li>
+                                    An “open and closed bracket pair” indicates that the element is a list and contains
+                                    similar elements                            
+                                </li>
+                                <li>
+                                    A grid icon indicates that the node is a container, holding multiple types of
+                                    containers, lists, etc                            
+                                </li>
+                                <li>
+                                    The choice icon (not pictured) indicates that the container is part of a choice
+                                    YANG statement                            
+                                </li>
+                                <li>
+                                    The leaf list icon (not pictured) indicates that the container is actually a leaf
+                                    list, holding multiple configurable values.
+                                    <p>
+                                        Note: In an empty leaf list, values (represented by the leaf list value icon ) may
+                                        be added using the Add Item button .                                
+                                    </p>                           
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <p>
+                                The left navigation panel is used for browsing between elements that are
+                                located on the same tree level. Clicking on an element name opens its position
+                                on the tree, revealing its data in the main panel (3). After selecting an element,
+                                the left panel updates its roster to show any items nested within. At the top of the
+                                panel, a bread crumb navigational button allows for traveling back up one tree
+                                level. The left navigation panel is home to the following buttons:                            
+                            </p>
+                            <ul>
+                                <li>
+                                    A check box toggle for selecting children nodes for deletion (activates Delete
+                                    button ). This function is covered in more detail in
+                                    Section 4.4 “Configuration Editing”.                                    
+                                </li>
+                                <li>
+                                    A check box toggle for selecting children nodes for deletion (activates Delete
+                                    button ). This function is covered in more detail in
+                                    Section 4.4 “Configuration Editing”.                                    
+                                </li>
+                                <li>
+                                    Exports the current element (and all child nodes) for text-based editing. See
+                                    Section 4.8.3 “Configuration Export (YAML, JSON)” for more information                                    
+                                </li>
+                                <li>
+                                    Imports the previously exported and subsequently edited element (and all
+                                    children nodes at current branch). See Section 4.8.4 “Configuration Import
+                                    (YAML, JSON)” for more information.                                    
+                                </li>
+                                <li>
+                                    Deletes all children nodes from this element                                    
+                                </li>
+                                <li>
+                                    The main panel displays YANG catalog element information. When an element
+                                    is opened, three tabbed sections are shown: Values, Name/Description, and
+                                    Details.
+                                    Under Values you will see three column headers: Name (a property name),
+                                    Value (the property’s editable value) and Actions.
+                                    Under Name/Description, you will find the Configuration’s name and description
+                                    (a good shortcut for note taking while editing). Naming a Configuration is covered
+                                    in Section 4.3.3 “Naming VelocityDRIVE CT Configurations”.
+                                    Under the Details tab, you will find a brief description of the element, the URI,
+                                    the Read-Only status and SID number                                    
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <p>
+                                The main panel displays YANG catalog element information. When an element
+                                is opened, three tabbed sections are shown: Values, Name/Description, and
+                                Details.
+                                Under Values you will see three column headers: Name (a property name),
+                                Value (the property’s editable value) and Actions.
+                                Under Name/Description, you will find the Configuration’s name and description
+                                (a good shortcut for note taking while editing). Naming a Configuration is covered
+                                in Section 4.3.3 “Naming VelocityDRIVE CT Configurations”.
+                                Under the Details tab, you will find a brief description of the element, the URI,
+                                the Read-Only status and SID number.        
+                                Once the YANG instances are retrieved, they may be edited in the Configurations
+                                Tab. A configuration, which can either be a patch to specific YANG instances or
+                                a whole datastore, can be thought of as a possible state of the entire switch or
+                                some specific part of its configuration.                        
+                            </p>
+                            <ul>
+                                <li>
+                                    This icon indicates that the element is a leaf.                                    
+                                </li>
+                                <li>
+                                    Clicking on the “caret right” icon reveals additional information on the leaf’s
+                                    property.                                    
+                                </li>
+                                <li>
+                                    A key icon next to certain names acts similarly to a key in a database schema,
+                                    indicating that it is a unique identifier for the containers in the list                                    
+                                </li>
+                                <li>
+                                    A shield icon indicates that the leaf is mandatory                                    
+                                </li>
+                                <li>
+                                    Pressing the fingerprint button copies the ID address of the instance/leaf. This
+                                    is particularly helpful when using the Command Line Tool Interface.                                    
+                                </li>
+                                <li>
+                                    Pressing the copy button will copy the present Value assigned to the
+                                    instance/leaf. This is particularly helpful when using the Command Line Tool Interface.                                    
+                                </li>
+                                <li>
+                                    Clicking the trash icon will delete the property entirely                                    
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            The Yang Elements panel lets the user add related YANG Elements under this
+                            node on the tree. See Section 4.4 “Configuration Editing” for more detail on using
+                            this feature                            
+                        </li>
+                        <li>
+                            The Devices dashboard performs the following functions on whichever Device is
+                            selected:                            
+                        </li>
+                        <ul>
+                            <li>
+                                The Sync button (or Apply Configuration button) applies whatever Configuration
+                                changes have been made to the device as a temporary change to the flash
+                                memory. The change will be removed with a device reset or power cycle.                                
+                            </li>
+                            <li>
+                                The Copy Datastore button copies your current Device’s entire YANG Catalog
+                                datastore into the associated Configuration file.                                
+                            </li>
+                            <li>
+                                The Open Datastore Root button opens the root folder of the Device.                                
+                            </li>
+                            <li>
+                                The Upload Startup Configuration button uploads the current Configuration
+                                as a Startup Configuration (see Section 4.6 “Configuration Upload” for more
+                                details)
+                                <p>
+                                    Note: In sections 2 and 4 above, you will notice that element names are grouped
+                                    in a column on the left, while their corresponding parent module names are
+                                    listed on the same line in a grayed out column to the right. Also, elements
+                                    colored in green are nodes that can contain values or strings that can be
+                                    modified.                                    
+                                </p>                                
+                            </li>
+                        </ul>
+                    </ol>
+
+                    <p>
+                        This summarizes the user interface while exploring the YANG Catalog through the Configurations
+                        tab, but slight differences are present when viewing the same YANG Catalog
+                        through the Devices tab.                        
+                    </p>
+                </div>
+            </div>
+    
+            <div class="chapter-division">
+                <h2 class="chapter-h2">Devices Tab</h2>
+                <p>
+                    The VelocityDRIVE CT Devices tab displays all VelocityDRIVE SP compatible switches currently connected and recognized by VelocityDRIVE CT.
+                </p>
+    
+                <div class="chapter-subdivision">
+                    <h3>Connecting a Device to VelocityDRIVE™ CT</h3>
+                    <p>
+                        Launch VelocityDRIVE CT and connect the desired device to your machine via USB cable. Navigate to the Devices tab.
+                    </p>
+
+                    <div class="img-container">
+                        <img src="devices-tab.gif" alt="">
+                        <p class="img-caption">Devices Tab</p>
+                    </div>
+
+                    <div class="chapter-subdivision">
+                        <h3>Enabling Networked Device Connections</h3>
+                        <p>
+                            Compatible Devices may be accessible via Ethernet connection, but they first must be configured for CoAP Over UDP. 
+                            Instructions to do so may be found in See Enabling CoAP Over UDP. 
+                            The Device card will show its corresponding system specific connection name (example: COM port name in Windows or file name of the device in Linux), followed by:
+                            Device Type
+                            <ul>
+                                <li>Firmware</li>
+                                <li>Connection State</li>
+                                <li>YANG Catalog checksum</li>
+                                <li>Device Family</li>
+                            </ul>
+                        </p>
+                    </div>
+        
+                    <div class="chapter-subdivision">
+                        <h3>Adding networked device connections</h3>
+                        <p>
+                            Additional Ethernet connected devices can be added using the Add Device button
+                            . The list of connected devices can be refreshed using Device Refresh button .
+                            Compatible Ethernet devices must first be configured over USB before connection.
+                            Sample instructions to do so may be found in Section 5.2 .
+                            <a href="">“Enabling CoAP Over UDP”</a>
+                        </p>
+                        <p>
+                            Upon connecting a VelocityDRIVE SP compatible switch to VelocityDRIVE CT, the software
+                            matches the switch to its YANG Catalog checksum. The tool then downloads the
+                            catalog and links it to the device. The user is then able to view the YANG datastore by
+                            clicking the Explore button as shown in Figure 3-8.
+                        </p>
+                        <div class="img-container">
+                            <img src="explore-button.gif" alt="">
+                            <p class="img-caption">Figure 3-8: Exploring Device YANG Catalog - Devices Tab</p>
+                        </div>
+                        <p>
+                            This will open the <i>/(root)</i> of your device's YANG Catalog datastore.
+                        </p>
+                    </div>
+
+                    <div class="chapter-subdivision">
+                        <h3>Upload Button</h3>
+
+                        <p>
+                            The Device card also displays an Upload button as shown in Figure 3-9.
+                        </p>
+                        <div class="img-container">
+                            <img src="UserInterface_DevicesTab.png" alt="">
+                            <p class="img-caption">Figure 3-9: Upload Button - Devices Tab</p>
+                        </div>
+
+                        <p>
+                            The Upload button provides two uses. As explained in Section 2.2 “Software and Firmware
+Download”, it may be used to apply a firmware update. Optionally, it can also be
+used to upload a startup configuration. Please see Section 4.8.2 “Device State Import
+(CBOR, JSON)” for more details.
+                        </p>
+                    </div>
+                </div>
+    
+                <div class="chapter-subdivision">
+                    <h3>Devices Tab Interface</h3>
+                    <p>
+                        VelocityDRIVE CT provides a familiar breadcrumb style interface to navigate the YANG Catalog tree. 
+                        The list of YANG elements are visible in the left sidebar menu. 
+                        <a href="">See Device User Interface Panels</a> outlines the Layout and Symbols found in the user interface
+                    </p>
+
+                    <div class="img-container">
+                        <img src="device-panels.png" alt="">
+                    </div>
+                    <ol>
+                        <li>
+                            The top navigation address bar displays the tree structure URI. It is interactive;
+                            the address names act as shortcuts, jumping to previous positions along the traveled
+                            path. Various icons provide context to the tree positions:                            
+                        </li>
+                        <li>
+                            The left navigation panel is used for browsing between elements that are
+                            located on the same tree level. Clicking on an element name opens its position
+                            on the tree, revealing its data in the main panel (3).The left panel will update to
+                            show any items nested within the selected element. At the top of the panel, a
+                            bread crumb navigational button allows for traveling back up one level.                            
+                        </li>
+                        <li>
+                            The main panel displays YANG catalog element information. When an element
+                            is open, two data tabs are shown, Values and Details. Under Values, three column
+                            headers (Name, Value, and Actions) are used to display a property name,
+                            its corresponding value, and in some instances a Refresh button is presented
+                            (see more detail in the bullet below). Under Details, you will find a brief description
+                            of the element, the URI, the Read-Only status and SID number. The following
+                            icons are used in interpreting the main panel:                            
+                        </li>
+                        <li>
+                            : The Refresh button sends a FETCH command to the device. This function is
+                            helpful for pulling changing variable information (such as statistics) from an
+                            active device. The Refresh button can appear next to both container names in
+                            the left navigation panel (for a full device refresh) and leaves in the main panel
+                            (for a refresh of just that element).                            
+                        </li>
+                        <li>
+                             : The Download button allows the user to export the current YANG Catalog
+                            entry in a variety of formats. When the button is used at Device root, the entire
+                            YANG tree is included. When used on an element, only that node and the elements
+                            contained within (including all children nodes) will be exported. See
+                            Section 4.8.1 “Device State Export (CBOR, JSON)” for more information.                            
+                        </li>
+                        <li>
+                             : The Cyclic Fetch button activates a repeating refresh cycle of all values on
+                            the connected device in 500 millisecond increments. These recurring refreshes
+                            can be stopped by pressing the button again.                            
+                        </li>
+                        <p>
+                            Note: A Configuration cannot be uploaded unless the Cyclic Fetch button has been
+                            deactivated                            
+                        </p>
+                    </ol>
+                </div>
+    
+                <div class="chapter-subdivision">
+                    <h3>Adding Ethernet Devices to VelocityDRIVE™ CT</h3>
+                    <p>
+                        VelocityDRIVE CT provides a familiar breadcrumb style interface to navigate the YANG Catalog tree. 
+                        The list of YANG elements are visible in the left sidebar menu. 
+                        <a href="">See Device User Interface Panels</a> outlines the Layout and Symbols found in the user interface
+                    </p>
+                </div>
+            </div>
+    
+            <div class="chapter-division">
+                <h3>Log Tab</h3>
+                
+                <div class="img-container">
+                    <img src="LogView_MainScreen.png" alt="">
+                    <p class="img-caption">Figure 3-12: Log View</p>
+                </div>
+
+                <p>
+                    In Figure 3-12, we see the Log tab main screen view. It is broken up into four sections.
+                </p>
+
+                <ol>
+                    <li>
+                        <p>
+                            The main log entry view provides a comprehensive list of all log events. Log
+                            events are ordered chronologically in descending order from oldest to newest.
+                            Each log event displays information in the following columns
+                        </p>
+                        <ul>
+                            <li>
+                                Index: the index column shows the individual index number for each log event
+                            </li>
+                            <li>
+                                Time: the system time of the log event.                                
+                            </li>
+                            <li>
+                                Severity: indicates if the event is conveying information (INFO) or if the event is a
+                                possible error (WARNING)                                
+                            </li>
+                            <li>
+                                Type: this column categorizes Log event. A Trace type provides information on
+                                VelocityDRIVE CT itself, a Device type provides information on the connected
+                                switch, a Send type indicates the Log event is a message from the tool to the
+                                device, and a Receive type is a message received by the tool from the network or
+                                device.                                
+                            </li>
+                            <li>
+                                Source: this column shows the origin location of the Log event.                                
+                            </li>
+                            <li>
+                                Protocol: this column lists the format in which the Log event was sent or
+                                received.                                
+                            </li>
+                            <li>
+                                Length: this column provides the byte size of the data that was transferred                                
+                            </li>
+                            <li>
+                                Description: this column lists a description of the nature of the Log event
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p>
+                            The Log Details panel provides expanded information regarding the Log event. In addition
+                            to the information from the columns in the main event list, it also displays information
+                            on the Status of the message (Segmented, Not Segmented, or Not Applicable), as
+                            well as the content of the message in CBOR or Binary formats (where available).
+                            The details panel also features a Filters tab. More details on the Filters tab is available
+                            in Section 3.8.0.1 “Filters Functionality”                            
+                        </p>
+                    </li>
+                    <li>
+                        <p>The lower Log panel features several useful functions</p>
+                        <ul>
+                            <li>
+                                This icon indicates that the log feed is in Auto Scroll mode. Auto Scroll allows
+                                for new log messages to populate at the bottom of the main panel in real time.
+                                Pressing the button toggles between Auto Scroll and Analysis modes.                                
+                            </li>
+                            <li>
+                                This icon represents Analysis mode. In this mode, auto scrolling is paused,
+                                allowing the user to select a single event without the screen moving on its own.                                
+                            </li>
+                            <li>
+                                Use this button to locate the log file location of the selected Log event.                                
+                            </li>
+                            <li>
+                                Index of the Message and Go: Use this box and the “Go” button to jump to the
+                                location of a specific Event index number.                                
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p>
+                            Using this panel, Log files from previous sessions can be loaded and viewed.
+                            Use the Open button to open a file saved elsewhere on your machine or from the
+                            default Log file location. In Windows, log files are located here:                            
+                        </p>
+                        <pre>
+                            C:\Users\{{USERNAME}}\AppData\Roaming\microchip-velocity-
+                                drivect\logs.
+                        </pre>
+                        <p>
+                            You may return to the live Log view by pressing the drop
+                            down carrot and choose “Online as source.                            
+                        </p>
+                    </li>
+                </ol>
+
+                <div class="chapter-subdivision">
+                    <h3>Filters Functionality</h3>
+
+                    <p>Within the Details tab of the Log side panel is the Filters menu item.</p>
+
+                    <div class="img-container">
+                        <img src="LogView_Filters.png" alt="">
+                        <p class="img-caption">Figure 3-13: Filters Menu</p>
+                    </div>
+                    <p>
+                        Selecting the Filters sub-tab opens the Log view filtering options. By deactivating or
+                        activating certain filters, you are able to narrow down which types of Log events you
+                        see in your list.                        
+                    </p>
+
+                    <h4>Log File Location</h4>
+                    <p>
+                        If a separate log document is required for troubleshooting, Windows users can view the
+                        individual log files on their computer from this location:
+                        <pre>
+                            C:\Users\{{USERNAME}}\AppData\Roaming\microchip-velocity-
+                                drivect\logs                            
+                        </pre>                        
+                    </p>
+                </div>
+            </div>
+            
+            <div class="chapter-division">
+                <h3>Settings Tab</h3>
+                
+                <div class="img-container">
+                    <img src="LogView_MainScreen.png" alt="">
+                    <p class="img-caption">Figure 3-14: Settings View</p>
+                </div>
+                <p>
+                    Figure 3-14 shows the Settings tab main screen view. The Settings tab provides an
+area for user security key management. Security key implementation is detailed in
+Section 5.5 “Datagram Transport Layer Security (DTLS)”.
+                </p>
+
+
+                <div class="img-container">
+                    <img src="" alt="">
+                    <p class="img-caption">Figure 3-15: Settings - Users and Keys</p>
+                </div>
+                <p>
+                    Figure 3-15 shows the Users subsection of the Settings tab. It is recommended to follow
+the setup steps in Section 5.5 “Datagram Transport Layer Security (DTLS)” before
+creating the initial default admin role Public Key.
+<ol>
+<!-- Code generated by MCHP Chatbot -->
+<li>
+  <strong>Name:</strong> lists the name for each user currently assigned a key. By default, <code>admin</code> is the first username.
+</li>
+<li>
+  <strong>Public Key:</strong> lists the public key assigned to the adjacent user.
+</li>
+<li>
+  <strong>Actions:</strong> provides icons to Copy ( ) a key, Edit ( ) a username, or Delete ( ) a username.<br>
+  <em>Note: The default admin username cannot be deleted.</em>
+</li>
+<li>
+  <strong>New User:</strong> The New User button ( ) generates a new sequentially numbered user account (<code>user1</code>, <code>user2</code>, etc.), providing a unique public key.
+</li>
+</ol>
+
+                </p>
+
+                <div class="chapter-subdivision">
+                    <h3>Filters Functionality</h3>
+
+                    <p>Within the Details tab of the Log side panel is the Filters menu item.</p>
+
+                    <div class="img-container">
+                        <img src="LogView_Filters.png" alt="">
+                        <p class="img-caption">Figure 3-13: Filters Menu</p>
+                    </div>
+                    <p>
+                        Selecting the Filters sub-tab opens the Log view filtering options. By deactivating or
+                        activating certain filters, you are able to narrow down which types of Log events you
+                        see in your list.                        
+                    </p>
+
+                    <h4>Log File Location</h4>
+                    <p>
+                        If a separate log document is required for troubleshooting, Windows users can view the
+                        individual log files on their computer from this location:
+                        <pre>
+                            C:\Users\{{USERNAME}}\AppData\Roaming\microchip-velocity-
+                                drivect\logs                            
+                        </pre>                        
+                    </p>
+                </div>
+            </div>
+
+            <div class="chapter-division">
+                <h2>Search Tool</h2>
+
+                <p>
+                    A search tool is provided to aide in finding relevant variables and values.                    
+                </p>
+
+                <div class="img-container">
+                    <img src="" alt="">
+                    <p class="img-caption">Figure 3-14: Search Bar</p>
+                </div>
+
+                <p>
+                    As seen in Figure 3-14, the Search tool is available in the top right of the navigation
+                    ribbon. It can be used while in any other tab, and its results appear as an overlay on
+                    top of the display currently in view.
+                </p>
+                <p>
+                    Search results appear in a right-side panel displaying results by origin: Configurations
+                    or Devices. The search results panel also includes a filter for Configurations and
+                    Devices, allowing you to limit results to a single domain.                    
+                </p>
+
+
+                <div class="img-container">
+                    <img src="" alt="">
+                    <p class="img-caption">Figure 3-15: Search Results</p>
+                </div>
+                <p>
+                    Each result displays the name of the data item, as well as information about its origin
+                    (Configuration name if this is a result value, connection ID if this is a Device value). The
+                    full instance ID is located under the name of the retrieved data item, allowing users to
+                    distinguish between similarly named results. Clicking on a result will take you to the
+                    page containing the item in question.                    
+                </p>
+                <p>
+                    Search terms are case insensitive.                    
+                </p>
+                <p>
+                    Note: The Search results panel is collapsible by using the &lt; button to the left of
+                    Results.                    
+                </p>
+            </div>
+
+            <div class="chapter-division">
+                <h2>Help Window</h2>
+
+                <div class="img-container">
+                    <img src="UserInterface_DisplayOptions.png" alt="">
+                    <p class="img-caption">Figure 3-16: Help File</p>
+                </div>
+
+                <p>
+                    To access this User Guide from within the tool itself, use the Help button in top ribbon
+                    of the application                    
+                </p>
+            </div>
+    
+            <div class="chapter-division">
+                <h2>Display Options</h2>
+
+                <div class="chapter-subdivision">
+                    <div class="img-container">
+                        <img src="UserInterface_DisplayOptions.png" alt="">
+                        <p class="img-caption">Figure 3-17: Hexadecimal View</p>
+                        <ol>
+                            <li>
+                                The symbolic representation of Value data can be toggled by Switch 1 as
+                                shown.                            
+                            </li>
+                            <li>
+                                The hexadecimal/decimal representation of the numeric values can be toggled
+                                by clicking on Switch 2                            
+                            </li>
+                        </ol>
+    
+                        <p>
+                            In Figure 3-17, the settings have been changed to show symbolic values. Those values
+                            are shown as hexadecimal                        
+                        </p>
+                    </div>                    
+                </div>
+
+
+                <div class="chapter-subdivision">
+                    <h3>Light and Dark Mode</h3>
+                    <div class="img-container">
+                        <img src="UserInterface_LightMode.png" alt="">
+                        <p class="img-caption">Figure 3-18: Light Mode</p>
+                    </div>
+                    <p>
+                        VelocityDRIVE CT features both a Light Mode and Dark Mode. It can be toggled by using the icon in the upper right as highlighted in See Light Mode.
+                    </p>
+
+                    <div class="img-container">
+                        <img src="UserInterface_DarkMode.png" alt="">
+                        <p class="img-caption">Figure 3-19: Dark Mode</p>
+                    </div>
+                    <p>
+                        Dark Mode is shown in See Dark Mode.
+                    </p>
+                    <p>
+                        Note: It should be noted that colors of various code variables will change depending on the mode. 
+                        Please see See YANG Library View in Light or Dark Mode for further explanation.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="index">
+            <div class="table-of-contents chapter">
+                <h1 class="chapter-h2"><a name="TOC">Table of Contents</h1>
+                <ol role="list">
+                    <li>
+                        <a href="../ToC/table_of_contents.html">
+                            <span>Table of Contents</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../Preface/preface.html">
+                            <span>Preface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter1/chapter1.html">
+                            <span>Chapter 1: Overview</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter2/chapter2.html">
+                            <span>Chapter 2: Installation instructions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter3/chapter3.html">
+                            <span>Chapter 3: User Interface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter4/chapter4.html">
+                            <span>Chapter 4: Configurations</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter5/chapter5.html">
+                            <span>Chapter 5: Configuration Use Cases</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter6/chapter6.html">
+                            <span>Chapter 6: Command Line Tool Interface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter7/chapter7.html">
+                            <span>Chapter 7: Default Configuration Backup Advisory</span>
+                        </a>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </body>
+</html>

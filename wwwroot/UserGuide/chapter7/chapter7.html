@@ -1,0 +1,96 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="../guide.css">
+    </head>
+    <body>
+        <div class="chapter">
+            <h1>Chapter 7: Default Configuration Backup Advisory</h1>
+
+            <div class="chapter-division">
+                <h2>Introduction</h2>
+                <p>
+                    This chapter discusses best practices when using VelocityDRIVE CT to ensure firmware
+                    usability and integrity                    
+                </p>
+            </div>
+
+            <div class="chapter-division">
+                <h2>Advisory</h2>
+
+                <p>
+                    <b>
+                        Please read and consider the following information before making changes to
+                        your network design:
+                    </b>
+                    When changing a default value (Ex. VLAN-Port-VID), be aware that some variable
+                    changes may not be supported by the switch’s firmware. If this is the case, the VelocityDRIVE
+                    CT tool will generate an error (indicated at bottom of the tool’s screen) when
+                    attempting to apply the unsupported change to the firmware. Navigating to the Log
+                    View will show the actual error message, including communication and trace details.
+                    Also be aware that some default settings should not be cleared from a Configuration.
+                    For example, it would be inadvisable to clear VID 1, as it is the management VLAN that
+                    is automatically applied to all ports. Be careful not to remove it, or other vital aspects.
+                    To safeguard design experimentation from irreversible changes, it is highly recommended
+                    to create a backup copy of your default configuration.
+                    Navigate to the /(root) of your unaltered Default configuration file, and using the Export
+                    button , export a full datastore of your YANG Catalog (either as *.JSON or *.BIN) and
+                    save it as a backup. With this best practice in place, you can always refer to the default
+                    configuration to compare the values of containers, sub-containers, and leaves that
+                    were present by default as you experiment with adding and removing different settings.                    
+                </p>
+            </div>
+        </div>
+        <div class="index">
+            <div class="table-of-contents chapter">
+                <h1 class="chapter-h2"><a name="TOC">Table of Contents</h1>
+                <ol role="list">
+                    <li>
+                        <a href="../ToC/table_of_contents.html">
+                            <span>Table of Contents</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../Preface/preface.html">
+                            <span>Preface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter1/chapter1.html">
+                            <span>Chapter 1: Overview</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter2/chapter2.html">
+                            <span>Chapter 2: Installation instructions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter3/chapter3.html">
+                            <span>Chapter 3: User Interface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter4/chapter4.html">
+                            <span>Chapter 4: Configurations</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter5/chapter5.html">
+                            <span>Chapter 5: Configuration Use Cases</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter6/chapter6.html">
+                            <span>Chapter 6: Command Line Tool Interface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter7/chapter7.html">
+                            <span>Chapter 7: Default Configuration Backup Advisory</span>
+                        </a>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </body>
+</html>

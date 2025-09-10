@@ -1,0 +1,702 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        <link rel="stylesheet" href="../guide.css">
+        <!-- <script>
+            // Set the body height to match the document height
+function setBodyHeight() {
+  const docHeight = Math.max(
+    document.body.scrollHeight,
+    document.documentElement.scrollHeight,
+    document.body.offsetHeight,
+    document.documentElement.offsetHeight
+  );
+  document.body.style.minHeight = docHeight + 'px';
+}
+
+window.addEventListener('load', setBodyHeight);
+window.addEventListener('resize', setBodyHeight);
+        </script> -->
+    </head>
+    <body>
+        <div class="chapter">
+            <h1>Configurations in VelocityDRIVE™ CT</h1>
+            
+            <div class="chapter-division">
+                <h2>Introduction</h2>
+                <p>
+                    As shown in See User Interface, VelocityDRIVE CT can monitor connected switches in the See Devices Tab and build YANG catalog changes in the See Configurations Tab.
+                    It is best to think of the See Devices Tab (and the explorable YANG libraries) as being the active state of a switch. 
+                    The See Configurations Tab should be viewed as a staging area for planned switch changes.
+                    Using both tab functions in tandem will allow a user to:
+                </p>
+                <ul>
+                    <li>See the switch's current state in action</li>
+                    <li>Copy the active Device state parameters to a Configuration and make changes</li>
+                    <li>Upload the new Configuration to the Device</li>
+                    <li>Confirm if those changes take affect on the Device(s) in real time</li>
+                </ul>
+                <p>
+                    In this chapter we will outline the different levels of Configurations a user can create, 
+                    the various methods used in creating Configurations, and how Configurations are applied to a device.
+                    Configuration Types
+                </p>
+            </div>
+    
+            <div class="chapter-division">
+                <h2>Configuration Types</h2>
+                <p>
+                    There are two main configuration types that a user can create. This first is a See Full Datastore Configuration based on a Device's entire YANG Catalog. 
+                    The second is a See Patch Datastore Configuration, which applies changes to only a subset of the YANG Catalog structure.
+                    If this is your first time interacting with the VelocityDRIVE ™ Configuration Tool User's Guide, 
+                    we recommend using the following steps first to create a Full Datastore Configuration to fully understand the operating principles of VelocityDRIVE CT.
+                </p>
+            </div>
+    
+            <div class="chapter-division">
+                <h2>Creating Configurations</h2>
+    
+                <div class="chapter-subdivision">
+                    <h3>Full Datastore Configurations</h3>
+                    <p>
+                        The simplest way to change the default values of a device’s running datastore is to
+                        retrieve the switch’s entire YANG instance for editing in a Full Datastore Configuration.
+                        VelocityDRIVE CT configurations are stored offline and do not become active on
+                        the switch until temporarily synced or uploaded and saved.
+                    </p>
+                    <p>
+                        <strong>
+                            Note: 
+                        </strong>
+                        <p>
+                            Once the device’s default configuration is retrieved by VelocityDRIVE CT, it
+                            recommended to export and save it as a reference. See Chapter 7. “Default
+                            Configuration Backup Advisory” for more details.
+                        </p>
+                    </p>
+                    <p>
+                        Once the device's default Configuration is copied by VelocityDRIVE CT, we recommend that it is exported saved as a reference. 
+                        See See Default Configuration Backup Advisory for more details.
+                    </p>
+
+                    <div class="chapter-subdivision">
+                        <h4>Device Selection</h4>
+
+                        <p>
+                            First, confirm that the target device is available and seen in the Devices tab. See
+                            Section 3.7 “Devices Tab” for more information on connecting a Device.                            
+                        </p>
+                        <p>
+                            Once you have verified your device selection, follow the steps in
+                            Section 3.7.1.2 “Exploring the YANG Catalog from the Devices tab” to enter the interface.                            
+                        </p>
+
+                        <div class="img-container">
+                            <img src="UserInterface_DevicesTabConfigDashboard.png" alt="">
+                            <p class="img-caption">Figure 4-1: Copying Original Device Configuration</p>
+                        </div>
+                        <p>
+                            Begin in the /(root) of your device's YANG Catalog datastore in the Devices tab.                            
+                        </p>
+                    </div>
+
+                    <div class="chapter-subdivision">
+                        <h4>Copying Full Datastore</h4>
+
+                        <p>
+                            In the Configurations dashboard highlighted in Figure 4-1, identify the Configuration
+                            named “Default” (see Section 4.3.3 “Naming VelocityDRIVE CT Configurations” for
+                            updating Configuration names). While still in the /(root) of your device, click the Copy
+                            Datastore button . This copies your Device's entire YANG Catalog datastore into
+                            the associated Configuration file.
+                            <strong>Note</strong>
+                            <p>
+                                The exact values seen between the running datastore in the Devices tab
+                                and those captured in the datastore seen in the Configurations tab may
+                                vary. There are two reasons for these variations. First, only configurable values
+                                are requested to be shown in the Configurations tab. Second, because
+                                VelocityDRIVE CT performs the datastore retrievals for a device and a configuration
+                                as two separate actions, other transactions occurring in the running
+                                datastore (such as those performed by other users) may have made
+                                changes to the values.
+                                Next, click the Open Configuration
+                            </p>
+                            Next, click the Open Configuration button. This opens the root folder of the Configuration.
+                            The “Default” Configuration is now ready to be named and worked with. See
+                            Section 4.4 “Configuration Editing” for working with the tool.                            
+                        </p>
+                    </div>
+                </div>
+    
+                <div class="chapter-subdivision">
+                    <h3>Patch Datastore Configuration</h3>
+    
+                    <p>
+                        For instances when only a particular segment of a switch's YANG Catalog will be modified,
+                        a Patch configuration can be created. Patch Datastore Configurations are smaller
+                        in file size and easier to navigate, as they only contain the segment of the YANG Catalog
+                        tree that is being changed. To create a Patch, we will create a new configuration
+                        in the Configurations tab.                        
+                    </p>
+
+                    <div class="chapter-subdivision">
+                        <h4>Creating a New Patch Configuration</h4>
+                        <div class="img-container">
+                            <img src="Configurations_CreatingNew.png" alt="">
+                            <p class="img-caption">Figure 4-2: Creating a New Patch Configuration</p>
+                        </div>
+                        <ol>
+                            <li>Navigate to the Configurations tab</li>
+                            <li>Click the Add New Configuration button</li>
+                            <li>A new Configuration card will appear</li>
+                        </ol>
+                        <p>
+                            After creating any new configuration, we recommend giving the configuration a unique name, as described in See Naming VelocityDRIVE CT Configurations. 
+                            For this example, we will use the name “Patch”.
+                        </p>
+                    </div>
+                    <div class="chapter-subdivision">
+                        <h4>Selecting Patch YANG Tree Segment</h4>
+                        <p>
+                            Now that the empty Patch Configuration has been created, navigate to the Device tab, and select the Explore button of the Device you will be working with.
+                        </p>
+                        <div class="img-container">
+                            <img src="Configurations_CopyingNodeForPatch.png" alt="">
+                            <p class="img-caption">Figure 4-3: Copying Node Structure For Patch Configuration</p>
+                        </div>
+                        <ol>
+                            <li>
+                                Use the branching tree structure to navigate to branch of the YANG catalog you
+                                wish to patch.                                
+                            </li>
+                            <li>
+                                In the lower left Configurations dashboard, press the Copy Datastore button
+                                in the newly created “Patch” configuration file.                                
+                            </li>
+                            <li>
+                                Clicking the Open Configuration button will open the Patch configuration for
+                                editing (see Figure 4-4).                                
+                            </li>
+                        </ol>
+                        <div class="img-container">
+                            <img src="Configurations_PatchConfiguration.png" alt="">
+                            <p class="img-caption">Figure 4-4: Patch Configuration</p>
+                        </div>
+                        <p>
+                            As you can see in Figure 4-4, only the YANG data branch isolated via navigation in the
+                            Devices tab has been copied to this patch configuration. See
+                            Section 4.4 “Configuration Editing” for more on working with the tool.                            
+                        </p>
+                    </div>
+                    <div class="chapter-subdivision">
+                        <h4>Alternate Patch Creation Methods</h4>
+                        <p>Patches can also be created in the following ways.</p>
+
+                        <h5>Alternate Method 1</h5>
+                        <p>
+                            Create a full datastore configuration (as described in Section 4.3.1 “Full Datastore
+                            Configuration”). Then, selectively remove all unneeded branches (see
+                            Section 4.4 “Configuration Editing” for instructions on removing branches). Any
+                            changes made to the remaining branches is considered a patch.                            
+                        </p>
+
+                        <h5>Alternate Method 2</h5>
+                        <p>
+                            Export a full datastore of your YANG Catalog from the /(root) of the Configuration tab
+                            using the Export button , saving it as a *.JSON file. Using a text editor, remove all
+                            unnecessary branches and make modifications to the isolated branch area. Then using
+                            the Import button , upload the Patch (setting upload type to “Patch,” not “Replacement”)
+                            to the appropriate branch segment of your existing Configuration. For more
+                            information on importing and exporting, please see Section 4.8 “Export And Import of
+                            Device Library and Configurations”.                            
+                        </p>
+                        <p>
+                            Note: Importing a Patch to a Configuration at the incorrect branch/node level will
+                            result in an error.                            
+                        </p>
+                    </div>
+                    <div class="chapter-subdivision">
+                        <h4>Naming VelocityDRIVE™ CT Configurations</h4>
+                        <p>
+                            For projects with multiple configurations files, it is highly advisable to give each configuration
+                            its own name.                            
+                        </p>
+                        <div class="img-container">
+                            <img src="Configurations_NamingConfiguration.png" alt="">
+                            <p class="img-caption">Figure 4-5: Naming Configuration</p>
+                        </div>
+                        <p>
+                            As shown in Figure 4-5:                            
+                        </p>
+                        <ol>
+                            <li>
+                                Navigate to the /(root) of your configuration container (or in a Patch, the highest
+                                level). If you have not copied any Datastore information, this will be blank.                                
+                            </li>
+                            <li>
+                                Click on the Name/Description tab                                
+                            </li>
+                            <li>
+                                Enter a new Configuration Name and Description. Then apply the change by
+                                clicking the Update button.                                
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="chapter-subdivision">
+                        <h4>Alternate Patch Creation Methods</h4>
+                        <p>
+                            <h5>Alternate Method 1</h5>
+                            <p>
+                                Create a full datastore configuration (as described in See Full Datastore Configuration). 
+                                Then, selectively remove all unneeded branches (see See Configuration Editing for instructions on removing branches). 
+                                Any changes made to the remaining branches is considered a patch.
+                            </p>
+    
+                            <h5>Alternate Method 2</h5>
+                            <p>
+    
+                            </p>
+                        </p>
+                    </div>
+                    <div class="chapter-subdivision">
+                        <h4>Naming VelocityDRIVE™ CT Configurations</h4>
+                        <p>
+                            For projects with multiple configurations files, it is highly advisable to give each configuration its own name.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chapter-division">
+                <h2>Configuration Editing</h2>
+
+                <p>
+                    In VelocityDRIVE CT, navigating through an active device’s YANG tree structure is a
+                    read-only experience. But when exploring a datastore retrieved from a device for use
+                    in a configuration, the majority of leaf values and variables are now editable.                    
+                </p>
+
+                <div class="chapter-subdivision">
+                    <h3>Deleting Nodes from a Configuration</h3>
+                    <p>Deleting unwanted nodes from a configuration can be performed in a bulk process.</p>
+
+                    <div class="img-container">
+                        <img src="Configurations_NodeSelection.png" alt="">
+                        <p class="img-caption">Figure 4-6: Node Selection Check Box Toggle Button</p>
+                    </div>
+                    <p>
+                        While in the Configurations tab, navigate to a level of your tree with multiple nodes.
+                        Click the Double Check Mark button to activate the node selection check boxes                        
+                    </p>
+
+                    <div class="img-container">
+                        <img src="Configurations_NodeDeletion.png" alt="">
+                        <p class="img-caption">Figure 4-7: Node Deletion Check Boxes</p>
+                    </div>
+                    <p>
+                        The node selection check boxes will appear, and the double check mark button have
+                        been marked to signify that the selection and deletion mode is now active.                        
+                    </p>
+
+                    <div class="img-container">
+                        <img src="Configurations_DeleteSelectedNode.png" alt="">
+                        <p class="img-caption">Figure 4-8: Deleting the Selected Node</p>
+                    </div>
+                    <p>
+                        Check the node(s) you wish to delete from the container. Once nodes have been
+                        selected, the red Delete button will become active. Press delete to remove the selected
+                        nodes.                        
+                    </p>
+
+                    <div class="img-container">
+                        <img src="Configurations_NodeDeletedConfirm.png" alt="">
+                        <p class="img-caption">Figure 4-9: Node Deleted Confirmation</p>
+                    </div>
+                    <p>
+                        At the bottom of the tool, you will see a confirmation message appear saying that your
+                        item has been deleted.                        
+                    </p>
+                    <p>
+                        Note: The deleted node has now reappeared in the YANG Elements library below
+                        the left side panel. Please see Section 4.4.3 “YANG Elements Side Bar”                        
+                    </p>
+                </div>
+
+                <div class="chapter-subdivision">
+                    <h3>Clearing Nodes from a Configuration</h3>
+                    <p>
+                        When all nodes are to be deleted, the Clear button removes them in one click.                        
+                    </p>
+                    <div class="img-container">
+                        <img src="Configurations_ClearButton.png" alt="">
+                        <p class="img-caption">Figure 4-10: Using the Clear Button</p>
+                    </div>
+                    <p>
+                        Note: Just as with the Delete function, the cleared nodes now reappear in the
+                        YANG Elements library below the left side panel. Please see
+                        Section 4.4.3 “YANG Elements Side Bar” for more information                        
+                    </p>
+                </div>
+
+                <div class="chapter-subdivision">
+                    <h3>YANG Elements Side Bar</h3>
+                    <p>
+                        The Yang Elements side bar appears dynamically throughout the Configuration side
+                        panel UI, signaling to the user that a particular branch of the YANG catalog have
+                        unused elements available.
+                        The elements may be added by checking their adjacent box and using the Add
+                        Selected button .                        
+                    </p>
+                </div>
+
+                <div class="chapter-subdivision">
+                    <h3>Adding Items to Containers and Leaf Lists</h3>
+                    <p>
+                        Both the list container and leaf list container icons in the branch path indicate
+                        that they are able to contain lists of special values. If already present, these values can
+                        be adjusted as outlined in Section 4.4.5 “Editing Values in a Configuration” below. If
+                        additional values are required, they can be added by navigating to the container or leaf
+                        list container and click on the Add Item button .                        
+                    </p>
+                </div>
+
+                <div class="chapter-subdivision">
+                    <h3>Editing Values in a Configuration</h3>
+                    <p>
+                        As described in Section 3.6.2 “Configurations Tab Interface”, the Values column found
+                        is found in the center of the main panel                        
+                    </p>
+
+                    <div class="img-container">
+                        <img src="Configurations_EditingValue.png" alt="">
+                        <p class="img-caption">Figure 4-11: Editing a Value</p>
+                    </div>
+                    <p>
+                        In the example in Figure 4-11, we see that max-bundle currently has a value of 0. We
+                        can change that value to a different integer. The value above it, failover-mode, also
+                        has an editable value, allowing you to toggle between revertive and non-revertive.
+                        Changing the values to “‘1” and “non-revertive,” we have now altered our Configuration.
+                        Before we upload these alterations as a permanent change, we may wish to test them
+                        on the switch temporarily using the Apply Configuration button (see
+                        Section 4.5 “Applying a Configuration”).                        
+                    </p>
+                </div>
+            </div>
+
+            <div class="chapter-division">
+                <h2>Applying a Configuration</h2>
+
+                <div class="img-container">
+                    <img src="Configurations_ApplyingConfig.png" alt="">
+                    <p class="img-caption">Figure 4-12: Applying a Configuration</p>
+                </div>
+                <p>
+                    Please note that changes made using the Apply Configuration button are saved
+                    into a VelocityDRIVE SP compatible switch’s flash memory temporarily. A device reset
+                    or power cycle will erase these changes.                    
+                </p>
+                <ol>
+                    <li>
+                        Continuing with the example in Section 4.4.5 “Editing Values in a Configuration”,
+                        we have edited our values to “non-revertive” and “1” in the Value column                        
+                    </li>
+                    <li>
+                        Pressing the Apply Configuration button , adjacent to the target Device in
+                        the Device dashboard, will apply these changes temporarily to the Device.                        
+                    </li>
+                    <li>
+                        If successful, a message will appear at the bottom of the user interface.                        
+                    </li>
+                </ol>
+                <p>
+                    Navigating to the same path address in the target Device will show that the values have
+                    been updated to match the new values in the Configuration, as shown in Figure 4-13.                    
+                </p>
+                <div class="img-container">
+                    <img src="Configurations_ConfigAppliedonDevice.png" alt="">
+                    <p class="img-caption">Figure 4-13: Configuration Applied on Device</p>
+                </div>
+                <p>
+                    The benefit of using the Apply Configuration button is that it empowers the user
+                    to observe how different values affect a device in real time. Values can be tweaked and
+                    applied until the desired result is achieved.                    
+                </p>
+                <p>
+                    Note: If the values are not what you expect them to be (after either using the Apply
+                    Configuration button or after a reset/power cycle), use the Refresh button
+                    while in the Device tab to send a FETCH command to the device (see
+                    Section 3.7.2 “Devices Tab Interface” for more details).                    
+                </p>
+                <p>
+                    To permanently apply changes to a device, a Full Datastore (root level) or Patch
+                    (branch level) Configuration will need to be uploaded (see Section 4.6 “Configuration
+                    Upload” for more details)                    
+                </p>
+            </div>
+            
+            <div class="chapter-division">
+                <h3>Configuration Upload</h3>
+
+                <p>
+                    Configurations can fall into two types, Full Datastore or Patch. Please see
+                    Section 4.2 “Configuration Types” for more information.
+                    VelocityDRIVE CT applies Configuration changes as new start up configurations,
+                    bypassing the process of exporting and uploading binary files.                    
+                </p>
+                <p>
+                    Note: Full Datastore configurations are applied using the CORECONF GET command,
+                    while Patches are executed using the iPATCH command.                    
+                </p>
+
+                <div class="img-container">
+                    <img src="Configurations_ConfigUpload.png" alt="">
+                    <p class="img-caption">Figure 4-14: Configuration Upload</p>
+                </div>
+                <p>
+                    Once you have made your parameter changes to your new Configuration (whether
+                    either a Full Datastore or Patch), navigate to the root node of the Configuration tab. In
+                    the Devices dashboard, click the Upload button as seen circled in Figure 4-14.                    
+                </p>
+                <p>
+                    Note: After uploading the start up Configuration, you must lightly press your
+                    device’s reset button just once, as instructed by the notification message
+                    shown in Figure 4-15. Do not perform a power cycle.                    
+                </p>
+
+                <div class="img-container">
+                    <img src="Configurations_UploadConfirm.png" alt="">
+                    <p class="img-caption">Figure 4-15: Configuration Upload Confirmation Message</p>
+                </div>
+                <p>
+                    Once the Device completes boot, the changes from the Configuration will remain on
+                    the device. Configuration changes are persistent unless a subsequent Configuration
+                    upload alters the parameters, or firmware is flashed using a secondary tool.                    
+                </p>
+            </div>
+
+            <div class="chapter-division">
+                <h3>troubleshooting Configurations with Delete Toggle</h3>
+
+                <p>
+                    If a Configuration is not behaving as expected, you may want to troubleshoot the
+                    design by seeing how the device behaves with particular containers no longer present.
+                    Yet removing and then reincorporating branches (and their values) one by one can be
+                    a tedious process (and may introduce errors). This is when the Delete Toggle
+                    feature is extremely useful.                    
+                </p>
+
+                <div class="img-container">
+                    <img src="DeleteToggle.png" alt="">
+                    <p class="img-caption">Figure 4-16: Delete Toggle</p>
+                </div>
+                <p>
+                    Located in top left of the user interface main panel in certain types of elements is the
+                    Delete Toggle button. Sliding it into the “on” position effectively deactivates or “mutes”
+                    the element (and all nodes and leafs nested under it) from the Configuration during the
+                    next upload or sync process.                    
+                </p>
+                <p>
+                    Note: With this toggle activated, the tool will perform the next upload to the device
+                    as an iPatch command, replacing the container with a null instance identifier.                    
+                </p>
+
+                <div class="img-container">
+                    <img src="DeleteToggleActivated.png" alt="">
+                    <p class="img-caption">Figure 4-17: Delete Toggle Activated</p>
+                </div>
+                <p>
+                    In Figure 4-17, we can see that the device was updated successfully with the container
+                    suppressed (notice the presence of the red stop icon now adjacent to the container).
+                    The container can be reinstated to the Configuration by deactivating the Delete
+                    Toggle and re-applying the Configuration.                    
+                </p>
+            </div>
+
+            <div class="chapter-division" id="export-import">
+                <h2>Export and Import of Device Library and Configurations</h2>
+
+                <p>
+                    Device libraries and VelocityDRIVE CT Configurations can be exported and imported,
+                    allowing for backup and restoration of data outside of the VelocityDRIVE CT Project
+                    file format                    
+                </p>
+
+                <p>
+                    Exports of both Device libraries and user created Configurations are saved in various
+                    text-based formats. This provides the added benefit of allowing users to edit exports in
+                    the text-based coding program of their choice. Exported files can also be diffed for
+                    debug comparison purposes. We advise users to make a backup of their Device’s original
+                    library as a regular best practice. Please see Chapter 7. “Default Configuration
+                    Backup Advisory” for more details.                    
+                </p>
+
+                <div class="chapter-subdivision" id="device-export">
+                    <h3>Device State Export (CBOR, JSON)</h3>
+
+                    <p>
+                        The current state of your Device can be exported directly from VelocityDRIVE CT as a
+                        CBOR or JSON text file.                        
+                    </p>
+
+                    <div class="img-container">
+                        <img src="Device_Config_Export_1.png" alt="">
+                        <p class="img-caption">Figure 4-18: Device Configuration Export</p>
+                    </div>
+
+                    <p>
+                        The content of any container on the Device can be exported in various formats. This
+                        action can be performed at / (root) (for the full datastore) or at any lower level in the
+                        YANG tree (for partial backups or patches).To export the content, click the Export button
+                        (shown in Figure 4-18) and choose the file format extension. The following formats
+                        are available:                        
+                    </p>
+                    <ul>
+                        <li>CBOR Diagnostic Notation</li>
+                        <li>CBOR Binary Image</li>
+                        <li>CBOR Binary Image as Hexadecimal Dump (text format to compare binary images with diff-tools)</li>
+                        <li>JSON File, which represents the YANG tree of instances</li>
+                    </ul>
+                </div>
+
+                <div class="chapter-subdivision" id="device-import">
+                    <h3>Device State Import (CBOR, JSON)</h3>
+
+                    <p>
+                        A CBOR-based start-up Configuration can also be applied directly to a Device using
+                        the Upload button on Device card as shown in Figure 4-19.                        
+                    </p>
+                    <div class="img-container">
+                        <img src="UserInterface_DevicesTab.png" alt="">
+                        <p class="img-caption">Figure 4-19: Device Card Upload Button</p>
+                    </div>
+                    <p>
+                        Pressing the Upload button will bring up a dialog menu. Make sure that Upload Type
+                        is set to Startup Configuration and the CoAP Method is set to PUT. Next, browse for
+                        the file. Click the Upload button in the dialog. Check that the log displays CREATED in
+                        response to the upload.
+                        Briefly press the reset button to power cycle (be aware that pressing and holding the
+                        button will reset the startup configuration).                    
+                    </p>
+                </div>
+
+                <div class="chapter-subdivision" id="config-export">
+                    <h3>Configuration Export (YAML, JSON)</h3>
+
+                    <p>
+                        The content of a configuration can be exported in various formats depending on the
+                        level of the YANG tree that the export originates from. Export the content using the
+                        Download button to the right of the container level.                       
+                    </p>
+
+                    <div class="img-container">
+                        <img src="Configurations_NamingConfiguration.png" alt="">
+                        <p class="img-caption">Figure 4-20: Device Configuration Export</p>
+                    </div>
+
+                    <!-- Code generated by MCHP Chatbot -->
+                    <p>
+                        As shown in Figure 4-20, performing this action at the absolute / (root) level of a configuration will generate an
+                        export in the following file formats:
+                    </p>
+                    <ul>
+                        <li>iPATCH YAML File (*.patch.yaml), for exports of configurations made of specific containers/branches</li>
+                        <li>FETCH YAML File (*.fetch.yaml), for exports of full datastores</li>
+                        <li>iPATCH JSON File (*.patch.json), for exports of configurations made of specific containers/branches</li>
+                        <li>FETCH JSON File (*.fetch.json), for exports of full datastores</li>
+                    </ul>
+                    <!-- Code generated by MCHP Chatbot -->
+                    <p>
+                        Exports performed at any level other than / (root) will generate file exports in the following formats:
+                    </p>
+                    <ul>
+                        <li>YAML File (*.yaml)</li>
+                        <li>JSON File (*.json), which represents the YANG tree of instances</li>
+                        <li>CBOR Diagnostic Notation File (*.cbor.diag.json)</li>
+                        <li>CBOR Binary File (*.cbor.bin)</li>
+                        <li>CBOR Text File (*.cbor.txt), a text format to compare binary images with diff-tools</li>
+                    </ul>
+                </div>
+                
+                <div class="chapter-subdivision" id="config-import">
+                    <h3>Configuration Import (YAML, JSON)</h3>
+
+                    <div class="img-container">
+                        <img src="Configurations_NamingConfiguration.png" alt="">
+                        <p class="img-caption">Device Configuration Import</p>
+                    </div>
+                    <p>
+                        Uploading a Configuration into VelocityDRIVE CT requires that the user is aware of
+                        several factors so that the correct upload method is selected.
+                        Pressing the Upload button to the right of the container will display the Import
+                        menu. Choose the Merge Type for the appropriate circumstance:                        
+                    </p>
+                    <ul>
+                        <li>
+                            Patch - Select if uploading a small change to a previously existing Configuration
+                            file.                            
+                        </li>
+                        <li>
+                            Put - Select if uploading a Full Datastore or Patch to an empty Configuration file.                            
+                        </li>
+                    </ul>
+                    <p>
+                        Note: Importing a Patch to a Configuration at the incorrect branch/node level will
+                        result in an error                        
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="index">
+            <div class="table-of-contents chapter">
+                <h1 class="chapter-h2"><a name="TOC">Table of Contents</h1>
+                <ol role="list">
+                    <li>
+                        <a href="../ToC/table_of_contents.html">
+                            <span>Table of Contents</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../Preface/preface.html">
+                            <span>Preface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter1/chapter1.html">
+                            <span>Chapter 1: Overview</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter2/chapter2.html">
+                            <span>Chapter 2: Installation instructions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter3/chapter3.html">
+                            <span>Chapter 3: User Interface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter4/chapter4.html">
+                            <span>Chapter 4: Configurations</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter5/chapter5.html">
+                            <span>Chapter 5: Configuration Use Cases</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter6/chapter6.html">
+                            <span>Chapter 6: Command Line Tool Interface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter7/chapter7.html">
+                            <span>Chapter 7: Default Configuration Backup Advisory</span>
+                        </a>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </body>
+</html>

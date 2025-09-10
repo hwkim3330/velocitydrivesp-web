@@ -1,0 +1,299 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="../guide.css">
+    </head>
+    <body>
+        <div class="chapter">
+            <h1>Command Line Tool Interface</h1>
+
+            <div class="chapter-content">
+                <div class="chapter-division" id="intro">
+                    <h2>Introduction</h2>
+                    <p>
+                        This chapter discusses basic command line operation of VelocityDRIVE CT. The tool
+                        is installed concurrently with the graphic user interface tool. In a Windows environment,
+                        the command line EXE file is named “MVDCT.exe” and is found here:
+                    </p>
+                    <div class="linux-code-block">
+                        <div class="linux-code-header">Path</div>
+                        <div class="linux-code-content">
+                            <pre>
+C:\Users\{{USERNAME}}\AppData\Local\Programs\microchip-velocity-drivect\resources\bin
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chapter-division" id="usage">
+                    <h2>Command Line Tool Usage</h2>
+                    <p>
+                        Running the MVDCT.exe program in a terminal window provides the following information
+                        and command operations:
+                    </p>
+                    <div class="linux-code-block">
+                        <div class="linux-code-header">Output</div>
+                        <div class="linux-code-content">
+                            <pre>
+Description:
+Microchip VelocityDRIVE CT (CLI) 2025.06.27
+COPYRIGHT(c) 2021 - 2025 by Microchip Inc.
+Usage:
+mvdct [command] [options]
+Options:
+lf, log-file &lt;log-file&gt; Path to the file to write JSON log
+con, console Display text log messages on the console
+cl, continue-log Do not truncate log file, but append new
+log entries to existing file
+pk, private-key &lt;private-key&gt; PEM file with private key to establish DTLS
+connection
+--version Show version information
+-?, -h, --help Show help and usage information
+Commands:
+d, device &lt;device&gt; Run this command on specific device
+(default command, the switch 'device' can be omitted)
+l, list Display list of available serial ports
+p, project &lt;project&gt; &lt;configuration&gt; &lt;item&gt; Commands to work with
+specific Microchip VelocityDRIVE CT project         
+k, key Commands to work with DTLS keys               
+                            </pre>
+                        </div>
+                    </div>
+                    <p>
+                        More information on a specific command can be read by adding the "-?" value to the end of the entry
+                    </p>
+                </div>
+
+                <div class="chapter-division" id="copy-paste">
+                    <h2>Copying and Pasting Values From the User Interface</h2>
+                    <p>
+                        When building a script for use with the Command Line Tool, you may need to copy and
+                        paste an element address or value string. As described in
+                        Section 3.6.2 “Configurations Tab Interface” and Section 3.7.2 “Devices Tab Interface”,
+                        the following buttons make this simple:
+                        • <img src="" alt="">: The fingerprint button copies the ID address of the instance/leaf.
+                        • <img src="" alt="">: The copy button will copy the present Value assigned to the instance/leaf.
+                        Using the commands listed in Section 6.2 “Command Line Tool Usage”, you can set up
+                        a Configuration for a COAP connection directly from a terminal window.
+                    </p>
+                </div>
+
+                <div class="chapter-division" id="download">
+                    <h2>YANG Catalog Download</h2>
+
+                    <p>
+                        When using the command line tool, it is important to first download the current YANG catalog into your environment.  
+                        This is performed through the following command (utilizing the specific com port or address on your device).
+                    </p>
+                    <div class="linux-code-block">
+                        <div class="linux-code-header">Command</div>
+                        <div class="linux-code-content">
+                            <pre>
+>mvdct COM3 yang download
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chapter-division" id="call">
+                    <h2>Call Device and Communicating Actions</h2>
+
+                    <p>
+                        The call command is an rpc/action that can be performed according to the features found in the YANG catalog. 
+                        The call command can be executed with the following Arguments and Options:
+                    </p>
+                    <div class="linux-code-block">
+                        <div class="linux-code-header">Usage: </div>
+                        <div class="linux-code-content">
+                            <pre>
+mvdct device &lt;device&gt; call [&lt;value&gt;...] [options]
+Arguments:
+&lt;device&gt;      Device to operate
+&lt;id&gt;          YANG instance identifier of specified 'rpc' or 'action' to execute
+&lt;value&gt;       Textual representation of YANG values to set
+as leaves of the input
+Options:
+i, input-file-name &lt;input-file-name&gt;    Input file contains
+the input data
+o, output-file-name &lt;output-file-name&gt;  Input file contains
+the input data
+w, wait &lt;wait&gt;                          Call rpc/action and
+wait after response 
+to collect log
+messages 
+[default:0]
+hex, hexadecimal                        Parse integers as
+hexadecimal values 
+(only for leaves)
+lf, log-file <log-file>                 Path to the file to
+write JSON log
+con, console                            Display text log
+messages on the 
+console
+ 	l, continue-log                        Do not truncate log
+file, but append 
+new log entries to 
+existing file
+pk, private-key &lt;private-key&gt;       	PEM file with
+private key to
+establish DTLS
+connection
+-?, -h, --help                		Show help and usage
+information 
+
+                            </pre>
+                        </div>
+                    </div>
+
+                    <div class="chapter-subdivision">
+                        <h3>Call Command - Clearing Forwarding Database on VID 1, Port 1</h3>
+                        <div class="linux-code-block">
+                            <div class="linux-code-header">Example</div>
+                            <div class="linux-code-content">
+                                <pre>
+mvdct COM3 call /ieee802-dot1q-bridge:bridges/bridge[name='b0']/component[name='c0']/mchp-velocitysp-bridge:fdb-flush i test.fdb-flush.json w 3                                    
+                                </pre>
+                            </div>
+                        </div>
+
+                        <p>
+                            In this case, a *.JSON file and the input-file-name command are being used to provide context to the fdb-flush function. 
+                            The contents of the “test.fdb-flush.json” file are:
+                        </p>
+                        
+                        <div class="linux-code-block">
+                            <div class="linux-code-header">Content</div>
+                            <div class="linux-code-content">
+                                <pre>
+{
+  "vid": 1,
+  "port":  1 
+}
+                                </pre>
+                            </div>
+                        </div>
+
+                        <p>
+                            Alternatively, the same command could be performed by providing the values to the command directly:
+                        </p>
+
+                        <div class="linux-code-block">
+                            <div class="linux-code-header">Example</div>
+                            <div class="linux-code-content">
+                                <pre>
+call /ieee802-dot1q-bridge:bridges/bridge[name='b0']/component[name='c0']/mchp-velocitysp-bridge:fdb-flush 1 1 --wait 3                                    
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chapter-division" id="examples">
+                    <h2>Command Line Configuration Examples</h2>
+                    
+                    <div class="chapter-subdivision" id="update">
+                        <h3>Updating Firmware</h3>
+                        <div class="linux-code-block">
+                            <div class="linux-code-header">Firmware Update</div>
+                            <div class="linux-code-content">
+                                <pre>
+    >mvdct com5 fw v
+    VelocitySP-DEV-1784-be79e15d-241115000453
+    >mvdct com5 fw u lan969x_EV23X71A.fip
+    Device COM5 is successfully updated.
+    >mvdct com5 coap send -m delete -u startup-config -sc deleted
+    Succeed 2.02 (DELETED)
+    >mvdct com5 fw v
+    VelocitySP-DEV-1811-c8dc97b8-241125112533
+    6.4.2 Setting                        
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chapter-subdivision" id="coap">
+                        <h3>Setting Up CoAP Connection</h3>
+                        <div class="linux-code-block">
+                            <div class="linux-code-header">CoAP Connection</div>
+                            <div class="linux-code-content">
+                                <pre>
+>mvdct list
+Devices: COM5
+>mvdct com5 yang download
+YANG catalog with ID 9035188127590564f97a71ffbbb2e647 available at
+C:\Users\test\AppData\Local\Programs\microchip-velocity-drivect\resour
+ces\bin\wwwroot\download\coreconf\9035188127590564f97a71ffbbb2e647.
+>mvdct com5 set
+/mchp-velocitysp-system:coap-server/config/security-mode no-sec
+Succeed
+>mvdct com5 set /ietf-interfaces:interfaces/interface "{ ""name"":
+""L3V1"" }"
+Succeed
+>mvdct com5 set
+/ietf-interfaces:interfaces/interface(name=L3V1)/ietf-ip:ipv4/address
+"{ ""ip"": ""169.254.12.167"", ""prefix-length"": 24 }"
+Succeed
+>mvdct com5 get / -f full.cbor.bin -cfg
+Succeed
+>mvdct com5 coap send --uri startup-config --content-format data -i
+full.cbor.bin --success-code created
+Succeed 2.01 (CREATED)                                               
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="index">
+            <div class="table-of-contents chapter">
+                <h1 class="chapter-h2"><a name="TOC">Table of Contents</h1>
+                <ol role="list">
+                    <li>
+                        <a href="../ToC/table_of_contents.html">
+                            <span>Table of Contents</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../Preface/preface.html">
+                            <span>Preface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter1/chapter1.html">
+                            <span>Chapter 1: Overview</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter2/chapter2.html">
+                            <span>Chapter 2: Installation instructions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter3/chapter3.html">
+                            <span>Chapter 3: User Interface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter4/chapter4.html">
+                            <span>Chapter 4: Configurations</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter5/chapter5.html">
+                            <span>Chapter 5: Configuration Use Cases</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter6/chapter6.html">
+                            <span>Chapter 6: Command Line Tool Interface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter7/chapter7.html">
+                            <span>Chapter 7: Default Configuration Backup Advisory</span>
+                        </a>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </body>
+</html>

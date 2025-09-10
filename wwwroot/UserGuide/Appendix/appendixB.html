@@ -1,0 +1,319 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="guide.css">
+    </head>
+
+    <div class="chapter">
+        <h1>Appendix B. YANG File Paths for Typical L2 Settings</h1>
+    </div>
+
+    <div class="chapter-division">
+        <h2>Introduction</h2>
+        <p>
+            This appendix provides information on various Layer-2 VLAN settings.
+        </p>
+    </div>
+
+    <div class="chapter-division">
+        <h2>YANG File Paths for Typical L2 Settings</h2>
+        <p>
+            Table B-1 provides a listing of typical Layer-2 YANG settings. More information, such
+            as type ranges and min-max values, can be found in the YANG Library tab of the UI.
+            The most popular VLAN settings are bolded in the table: VLAN-PORT-VID, VLAN-ID,
+            VLAN-EGRESS-PORTS, and VLAN-UNTAGGED-PORTS.
+        </p>
+
+        <div>
+        <div align="left">
+            <table class="Title_w_Lines">
+                <caption class="Body">
+                    <p class="TableTitle">Table B&#x2D;1&#x3A;<span style="padding-right:28pt ;">&#8203</span><a
+                            id="Settings9" name="XREF_18639__External_Links_to_Yang_Layer-2_Settings9">External Links to
+                            Yang Layer&#x2D;2 Settings </a></p>
+                </caption>
+                <col width="121.38px" />
+                <col width="138.41px" />
+                <col width="60.55px" />
+                <col width="182.60px" />
+                <tr height="20.27px">
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;text-align:center;direction:ltr;font-weight:Bold;font-size : 9.00pt;font-kerning:none;">
+                            <a id="654416" name="78_Body_654416"></a>VLAN Settings</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;text-align:center;direction:ltr;font-weight:Bold;font-size : 9.00pt;font-kerning:none;">
+                            Description</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;text-align:center;direction:ltr;font-weight:Bold;font-size : 9.00pt;font-kerning:none;">
+                            Default</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;text-align:center;direction:ltr;font-weight:Bold;font-size : 9.00pt;font-kerning:none;">
+                            YANG File Paths</p>
+                    </td>
+                </tr>
+                <tr height="84.26px">
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-size : 9.00pt;">
+                            VLAN&#x2D;PORT&#x2D;TYPE</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span style="font-family : Arial ; font-size : 9.00pt;">Port type (unaware&#47;
+                                c&#x2D;port&#47; s&#x2D;port mapping to d&#x2D;bridge&#x2D;port&#47;
+                                c&#x2D;vlan&#x2D;bridge&#x2D;port&#47; provider&#x2D;network&#x2D;port).</span></p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-size : 9.00pt;font-kerning:none;">
+                            unaware</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span
+                                style="font-family : Arial ; font-size : 9.00pt;">&#47;if&#x3A;interfaces&#47;interface[name]&#47;dot</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">1q&#x3A;bridge&#x2D;port&#47;port&#x2D;type</span>
+                        </p>
+                    </td>
+                </tr>
+                <tr height="88.58px">
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-weight:Bold;font-size : 9.00pt;font-kerning:none;">
+                            VLAN&#x2D;PORT&#x2D;VID</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span style="font-family : Arial ; font-size : 9.00pt;">Port VLAN ID (ingress default VLAN
+                                ID). Incoming frames are classified based on the port VLAN ID </span></p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-size : 9.00pt;font-kerning:none;">
+                            1</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span
+                                style="font-family : Arial ; font-size : 9.00pt;">&#47;if&#x3A;interfaces&#47;interface[name]&#47;dot</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">1q&#x3A;bridge&#x2D;port&#47;pvid</span>
+                        </p>
+                    </td>
+                </tr>
+                <tr height="72.52px">
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-size : 9.00pt;font-kerning:none;">
+                            VLAN&#x2D;PORT&#x2D;ACCEPTED&#x2D;FRAMES</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span style="font-family : Arial ; font-size : 9.00pt;">Accepted frame types (all&#47;
+                                vlan&#x2D;tagged&#47; untagged&#x2D;and&#x2D;priority&#x2D;ta</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">gged)</span></p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-size : 9.00pt;font-kerning:none;">
+                            all</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span
+                                style="font-family : Arial ; font-size : 9.00pt;">&#47;if&#x3A;interfaces&#47;interface[name]&#47;dot</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">1q&#x3A;bridge&#x2D;port&#47;acceptable&#x2D;frame</span>
+                        </p>
+                    </td>
+                </tr>
+                <tr height="52.16px">
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-size : 9.00pt;font-kerning:none;">
+                            VLAN&#x2D;PORT&#x2D;INGRESS&#x2D;FILTERING</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span style="font-family : Arial ; font-size : 9.00pt;">VLAN ingress filtering
+                                (enabled&#47;disabled)</span></p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-size : 9.00pt;font-kerning:none;">
+                            disabled</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span
+                                style="font-family : Arial ; font-size : 9.00pt;">&#47;if&#x3A;interfaces&#47;interface[name]&#47;dot</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">1q&#x3A;bridge&#x2D;port&#47;enable&#x2D;ingress&#x2D;filt</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">ering</span></p>
+                    </td>
+                </tr>
+                <tr height="68.21px">
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-weight:Bold;font-size : 9.00pt;font-kerning:none;">
+                            VLAN&#x2D;VID</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span style="font-family : Arial ; font-size : 9.00pt;">Forwarding is based on the VLAN ID
+                                (key) of the entry. between 1 and 4&#x30;94</span></p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-size : 9.00pt;font-kerning:none;">
+                            1</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span
+                                style="font-family : Arial ; font-size : 9.00pt;">&#47;dot1q&#x3A;bridges&#47;bridge[name]&#47;co</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">mponent[name]&#47;filtering&#x2D;databas</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">e&#47;vlan&#x2D;registration&#x2D;entry[databas</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">e&#x2D;id vids]&#47;vids</span></p>
+                    </td>
+                </tr>
+                <tr height="84.26px">
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-weight:Bold;font-size : 9.00pt;font-kerning:none;">
+                            VLAN&#x2D;EGRESS&#x2D;PORTS</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span style="font-family : Arial ; font-size : 9.00pt;">VLAN egress port list. Forwarding is
+                                limited by the egress port reference</span></p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;" />
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span
+                                style="font-family : Arial ; font-size : 9.00pt;">&#47;dot1q&#x3A;bridges&#47;bridge[name]&#47;co</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">mponent[name]&#47;filtering&#x2D;databas</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">e&#47;vlan&#x2D;registration&#x2D;entry[databas</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">e&#x2D;id
+                                vids]&#47;port&#x2D;map[port&#x2D;ref]&#47;port&#x2D;ref</span></p>
+                    </td>
+                </tr>
+                <tr height="116.36px">
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-weight:Bold;font-size : 9.00pt;font-kerning:none;">
+                            VLAN&#x2D;UNTAGGED&#x2D;PORTS</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span style="font-family : Arial ; font-size : 9.00pt;">VLAN untagged port list (for each
+                                port, only one VLAN may be untagged)</span></p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-size : 9.00pt;font-kerning:none;">
+                            untagged</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span
+                                style="font-family : Arial ; font-size : 9.00pt;">&#47;dot1q&#x3A;bridges&#47;bridge[name]&#47;co</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">mponent[name]&#47;filtering&#x2D;databas</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">e&#47;vlan&#x2D;registration&#x2D;entry[databas</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">e&#x2D;id
+                                vids]&#47;port&#x2D;map[port&#x2D;ref]&#47;static&#x2D;vla</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">n&#x2D;registration&#x2D;entries&#47;vlan&#x2D;trans</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">mitted</span></p>
+                    </td>
+                </tr>
+                <tr height="68.21px">
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-size : 9.00pt;font-kerning:none;">
+                            QOS&#x2D;CONF</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span style="font-family : Arial ; font-size : 9.00pt;">Credit Based Shaper idle slope. 8
+                                queues per port</span></p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-size : 9.00pt;font-kerning:none;">
+                            &#x30;</p>
+                    </td>
+                    <td
+                        style="border-left-width:0.5pt;border-left-style:solid;border-left-color:#000000;border-bottom-width:0.5pt;border-bottom-style:solid;border-bottom-color:#000000;border-right-width:0.5pt;border-right-style:solid;border-right-color:#000000;border-top-width:0.5pt;border-top-style:solid;border-top-color:#000000;">
+                        <p class="Body"
+                            style="margin-top : 0.00pt;margin-bottom : 0.00pt;direction:ltr;font-family : Times New Roman ; font-size : 12.00pt;font-kerning:none;">
+                            <span
+                                style="font-family : Arial ; font-size : 9.00pt;">&#47;if&#x3A;interfaces&#47;interface[name]&#47;lm&#x2D;</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">port&#x3A;eth&#x2D;qos&#47;config&#47;traffic&#x2D;class&#x2D;s</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">hapers[traffic&#x2D;class]&#47;credit&#x2D;based</span><span
+                                style="font-family : Arial ; font-size : 9.00pt;">&#47;idle&#x2D;slope</span></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    
+        <p class="Body">Ingress flows are critically important considerations for a secure and predictable VLAN design,
+            depending on if the switch's ingressing traffic is tagged or untagged, egressing as tagged or
+            untagged, or VLAN filtered. Therefore, it is recommended to consult with an experienced Network Operator or
+            Network Engineer to implement your network traffic flows.</p>
+    </div>
+    </div>
+</html>

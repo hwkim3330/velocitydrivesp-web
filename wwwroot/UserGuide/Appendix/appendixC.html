@@ -1,0 +1,129 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="guide.css">
+    </head>
+    
+    <div class="chapter">
+        <h1>Appendix C. Time Sensitive Networking Concepts</h1>
+
+        <div class="chapter-division">
+            <h2>Introduction</h2>
+
+            <p>
+                This appendix shows an overview of Time Sensitive Networking (TSN) categories that
+are configurable using the VelocityDRIVE CT tool.
+            </p>
+        </div>
+
+        <div class="chapter-division">
+            <h2>Credit Based Shaper</h2>
+
+            <p>
+                Credit Based Shaper is defined in the IEEE 802.1Q-2014 standard and is the ability to 
+                control the traffic access bandwidth based on priorities. The highest priority queue can
+                be assigned a higher access bandwidth relative to the available bandwidth, which in
+                turn gives higher chance for packets to be transmitted in a busy network.
+                The mechanism is realized through increasing/decreasing credit value of the specific
+                queues, i.e., the credit for high priority queues increases faster and therefore reaches
+                the transmitting threshold more frequent than the low priority queues. The algorithm
+                includes two parts, namely assigning priorities to traffic classes/queues and assigning
+                relative access bandwidth (reflected in credits) to the queues.
+            </p>
+        </div>
+
+        <div class="chapter-division">
+            <h2>Time Aware Shaper</h2>
+
+            <p>
+                Time Aware Shaper is defined in the IEEE 802.1Qbv standard and is the ability to allow
+                transmission from each queue to be scheduled relative to a known global timescale.
+                The global time is maintained by using a specific version of Precision Time Protocol
+                (PTP) as defined in IEEE 802.1AS-Rev.                
+            </p>
+        </div>
+
+        <div class="chapter-division">
+            <h2>Frame Preemption</h2>
+
+            <p>
+                Frame Preemption is defined in the IEEE 802.1Qbu and IEEE 802.3br standards.
+                Frame Preemption is the ability to suspend the transmission of a non time-critical
+                frame, and allow for one or more time-critical frames to be transmitted. When the
+                time-critical frames have been transmitted, the transmission of the non time-critical
+                frame is resumed. A non time-critical frame could be preempted multiple times.
+                The use of Frame Preemption with Time Aware Shaping reduces the guard band
+                needed from the size of the largest possible interfering frame to the size of the largest
+                possible interfering fragment as shown below.
+            </p>
+
+            <div class="img-container">
+                <img src="VelocityCT_User_Guide_Appendix_C_image329.jpg" alt="">
+                <p class="img-caption">
+                    <strong>
+                        Figure C-1: Time Aware Shaping Without Frame Preemption
+                    </strong>
+                </p>
+            </div>
+            <div class="img-container">
+                <img src="VelocityCT_User_Guide_Appendix_C_image331.jpg" alt="">
+                <p class="img-caption">
+                    <strong>
+                        Figure C-2: Time Aware Shaping With Frame Preemption
+                    </strong>
+                </p>
+            </div>
+
+            <p>
+                Frame Preemption must be enabled on both egress port level and on egress
+                port/queue level.
+                Frame Preemption is disabled by default on port level and disabled by default on
+                port/queue level.
+            </p>
+        </div>
+
+        <div class="chapter-division">
+            <h2>Per-Stream Filtering and Policing</h2>
+
+            <p>
+                Per-Stream Filtering and Policing (PSFP), as defined in the IEEE 802.1Qci standard,
+                provides filtering, policing and service class selection for a stream.
+                A stream is defined in the same way as in FRER but the stream IDs may be different.                
+            </p>
+
+            <div class="img-container">
+                <img src="VelocityCT_User_Guide_Appendix_C_image333.jpg" alt="">
+                <p class="img-caption">
+                    <strong>
+                        Figure C-3: Per-Stream Filtering and Policing
+                    </strong>
+                </p>
+            </div>
+
+            <p>
+                The stream filter instance table is an ordered list of stream filters where smaller identifier
+                values appear earlier in the ordered list. This is especially important to know if
+                wild-card match parameters are used. If a frame matches more than one stream filter,
+                the stream filter that is selected is the one that is located earliest in the list.
+                Each stream filter instance has s reference to a stream gate instance and optionally a
+                reference to a flow meter instance.
+                The port parameter in the stream filter instance definition is not a part of the current
+                standard, but is added in order to support different filters for each of the replicated
+                streams in FRER.
+            </p>
+            <p>
+                <!-- Code generated by MCHP Chatbot -->
+                When configuring stream filters for PSFP, the hardware imposes some restrictions on the configuration:
+            
+                <ul>
+                    <li>The maximum number of stream filter instances using the same stream ID is two.</li>
+                    <li>Both of these instances must be configured with the same priority (specific or wildcard).</li>
+                    <li>Both of these instances must be configured with different ports, and both ports must be specific (non-wildcard).
+                    </li>
+                </ul>
+            
+                The easiest way to avoid error messages due to these restrictions is to first configure
+                priority and port and then stream ID.
+            </p>
+        </div>
+    </div>
+</html>

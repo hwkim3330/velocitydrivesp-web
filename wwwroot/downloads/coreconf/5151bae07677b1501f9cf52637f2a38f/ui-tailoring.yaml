@@ -1,0 +1,9 @@
+ui-tailoring:
+  identity-accept-list:
+  - base: "ietf-interfaces:interface-type"
+    accept-list:
+    - identity: "iana-if-type:ethernetCsmacd"
+    - identity: "iana-if-type:ieee8023adLag"
+    - identity: "iana-if-type:l3ipvlan"
+
+

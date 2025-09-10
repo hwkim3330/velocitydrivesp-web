@@ -1,0 +1,305 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        <link rel="stylesheet" href="../guide.css">
+    </head>
+    <body>
+        <div class="chapter" id="preface">
+            <h1>Preface</h1>
+    
+            <div class="chapter-content">
+                <div class="chapter-division" id="notice">
+                    <table border="1">
+                        <tbody>
+                            <tr>
+                                <td rowspan="1" colspan="1">
+                                    NOTICE TO CUSTOMERS
+                                </td>
+                            </tr>
+                            <tr>
+                                <td rowspan="1" colspan="1">
+                                    <p>
+                                        All documentation becomes dated, and this manual is no exception. 
+                                        Microchip tools and documentation are constantly evolving to meet customer needs, so some actual dialogs and/or tool descriptions may differ from those in this document. 
+                                        Please refer to our website (www.microchip.com) to obtain the latest documentation available.
+                                    </p>
+                                    <p>
+                                        Documents are identified with a “DS” number. This number is located on the bottom of each page, in front of the page number. 
+                                        The numbering convention for the DS number is “DSXXXXXA”, where “XXXXX” is the document number and “A” is the revision level of the document
+                                    </p>
+                                    <p>
+                                        For the most up-to-date information on development tools, see the VelocityDRIVE CT online help. 
+                                        Select the Help menu, and then Topics to open a list of available online help files.
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="chapter-division" id="license">
+                    <h2>Software Usage Terms and Legal Notice</h2>
+                    <h4>(c) 2025 Microchip Technology Inc. and its affiliates, all rights reserved.</h4>
+
+                    <p>
+                        We created this Velocity Drive Configuration Tool (the 'Software') for everyone. Standards like YANG,
+CORECONF, and CBOR, makes managing networks easier and resource-friendly. We encourage you to
+use the Software and share your thoughts with us.
+                    </p>
+
+                    <p>
+The Software currently supports network configuration using the YANG data modeling language (RFC
+7950), CBOR (RFC 7049), and CORECONF (RFC 9254). Use discretion if using with any future versions
+of the listed data modeling language or similar data modeling languages.
+Subject to your compliance with the conditions set forth herein, you may use and redistribute the Software
+in binary form provided hereunder. 
+
+                    </p>
+
+                    <p>
+1. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
+the following disclaimer in the documentation and/or other materials provided with the distribution.
+2. Neither Microchip's name nor the names of any contributors may be used to endorse or promote
+products derived from this Software without specific prior written permission.
+                    </p>
+
+                    <p>
+                        <strong>
+                            THIS SOFTWARE IS SUPPLIED "AS IS". NO WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE,
+INCLUDING ANY IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR PURPOSE. 
+IN NO EVENT WILL MICROCHIP OR ANY CONTRIBUTORS BE LIABLE FOR ANY INDIRECT, SPECIAL,
+PUNITIVE, INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE.
+YOU ARE RESPONSIBLE FOR COMPLIANCE WITH ALL APPLICABLE LAWS AND REGULATIONS
+REGARDING EXPORT, IMPORT, AND USE OF THE SOFTWARE.
+                        </strong>
+                    </p>
+                </div>
+    
+                <div class="chapter-division" id="introduction">
+                    <h2 class="chapter-h2">Introduction</h2>
+                    This chapter contains general information that will be useful to know before using VelocityDRIVE™ Configuration Tool User's Guide. 
+                    Items discussed in this chapter include:
+                    <ul>
+                        <li>
+                            <a href="#layout">Document Layout</a>
+                        </li>
+                        <li>
+                            <a href="#conventions">Conventions Used in this Guide</a>
+                        </li>
+                        <li>
+                            <a href="#website">The Microchip Website</a>
+                        </li>
+                        <li>
+                            <a href="#notifications">Customer Change Notification Service</a>
+                        </li>
+                        <li>
+                            <a href="#support">Customer Support</a>
+                        </li>
+                        <li>
+                            <a href="#history">Document Revision History</a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="chapter-division" id="layout">
+                    <h2 class="chapter-h2">Document Layout</h2>
+                    <p>
+                        This document describes how to use the VelocityDRIVE ™ Configuration Tool User's Guide
+                        configuration and programming tool for Microchip Switch products.
+                        The manual layout is as follows:
+                    </p>
+                    <ul>
+                        <li>
+                            <a href="">
+                                Chapter 1: "Overview"
+                            </a>
+                            - This chapter explains the scope of the tool, what platforms
+                            it runs on, and several of its key features.
+                        </li>
+                        <li>
+                            <a href="">
+                                Chapter 2: "VelocityDRIVE™ CT Installation Instructions"
+                            </a>
+                            - This chapter guides the
+                            user through VelocityDRIVE CT installation on both Windows and Linux
+                        </li>
+                        <li>
+                            <a href="">
+                                Chapter 3: "User Interface"
+                            </a>
+                            - This chapter explains the first steps of creating new
+                            projects and how to navigate the user interface
+                        </li>
+                        <li>
+                            <a href="">
+                                Chapter 4: "Configurations in VelocityDRIVE™ CT"
+                            </a>
+                            - This chapter outlines how to
+                            create, edit, and apply device configurations
+                        </li>
+                        <li>
+                            <a href="">
+                                Chapter 5: "Configuration Use Cases"
+                            </a>
+                            - This chapter provides information on several
+                            common configuration use cases.
+                        </li>
+                        <li>
+                            <a href="">
+                                Chapter 6: "Command Line Tool Interface"
+                            </a>
+                            - This chapter shows information on
+                            how to access the command line version of the tool
+                        </li>
+                        <li>
+                            <a href="">
+                                Chapter 7: "Default Configurations Backup Advisory"
+                            </a>
+                            - This chapter contains necessary
+                            cautions to the user to avoid accidental mismanagement
+                        </li>
+                        <li>
+                            <a href="">
+                                Appendix A: "YANG Library View in Light or Dark Mode"
+                            </a>
+                            - This appendix
+                            shows how the YANG library may be interpreted in both Light and Dark mode
+                        </li>
+                        <li>
+                            <a href="">
+                                Appendix B: "YANG File Paths for Typical L2 Settings"
+                            </a>
+                            - This appendix provides
+                            information on various Layer-2 VLAN settings.
+                        </li><li>
+                            <a href="">
+                                Appendix C: "Time Sensitive Networking Concepts"
+                            </a>
+                            - This appendix shares
+                            information on various Time Sensitive Networking concepts that are relevant to
+                            the VelocityDRIVE CT's configuration capabilities.
+                        </li>
+                    </ul>
+                </div>
+    
+                <div class="chapter-division" id="conventions">
+                    <h2 class="chapter-h2">Conventions Used In this Guide</h2>
+                    <p>This manual uses the following documentation conventions</p>
+                    <object data="table2.html" width="100%" height="100%"></object>
+                </div>
+    
+                <div class="chapter-division" id="website">
+                    <h2 class="chapter-h2">The Microchip Website</h2>
+                    <p>
+                        <a href="https://www.microchip.com" target="_blank">
+                            Microchip provides online support via our website at www.microchip.com. 
+                        </a>
+                        This website is used as a means to make files and information easily available to customers.
+                            Accessible by using your favorite Internet browser, the website contains the following information:
+                    </p>
+                    <p>
+                        <b>Product Support</b> - Data sheets and errata, application notes and sample programs, design resources, user's guides and hardware support documents, latest software releases, and archived software
+                    </p>
+                    <p>
+                        <b>General Technical Support</b> - Frequently Asked Questions (FAQs), technical support requests, online discussion groups, Microchip consultant program member listing
+    
+                    </p>
+                    <p>
+                        <b>Business of Microchip</b> - Product selector and ordering guides, latest Microchip press releases, listing of seminars and events, listings of Microchip sales offices, distributors, and factory representatives
+                    </p>
+                </div>
+    
+                <div class="chapter-division" id="notifications">
+                    <h2 class="chapter-h2">Customer Change Notification Service</h2>
+                    <p>
+                        Microchip's customer notification service helps keep customers current on Microchip products.
+                        Subscribers will receive e-mail notification whenever there are changes, updates, revisions or errata related to a specified product family or development tool of interest.
+                    </p>
+                    <p>
+                        <a href="https://www.microchip.com" target="_blank">
+                            To register, access the Microchip web site at www.microchip.com, click on Customer Change Notification and follow the registration instructions.
+                        </a>
+                    </p>
+                </div>
+    
+                <div class="chapter-division" id="support">
+                    <h2 class="chapter-h2">Customer Support</h2>
+                    <p>Users of Microchip products can receive assistance through several channels:</p>
+                    <ul>
+                        <li>Distributor or Representative</li>
+                        <li>Local Sales Office</li>
+                        <li>Field Application Engineer (FAE)</li>
+                        <li>Technical Support</li>
+                    </ul>
+                    <p>
+                        Customers should contact their distributor, representative or field application engineer (FAE) for support. 
+                        Local sales offices are also available to help customers. 
+                        A listing of sales offices and locations is included in the back of this document.
+                    </p>
+                    <p>
+                        <a href="https://www.microchip.com/support" target="_blank">Technical support is available through the website at: http://www.microchip.com/support</a>
+                    </p>
+                </div>
+    
+                <div class="chapter-division" id="history">
+                    <h2 class="chapter-h2">Document Revision History</h2>
+                    <object data="table3.html" width="100%" height="100%"></object>
+                </div>
+            </div>
+        </div>
+        <div class="index">
+            <div class="table-of-contents chapter">
+                <h1 class="chapter-h2"><a name="TOC">Table of Contents</h1>
+                <ol role="list">
+                    <li>
+                        <a href="../ToC/table_of_contents.html">
+                            <span>Table of Contents</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../Preface/preface.html">
+                            <span>Preface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter1/chapter1.html">
+                            <span>Chapter 1: Overview</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter2/chapter2.html">
+                            <span>Chapter 2: Installation instructions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter3/chapter3.html">
+                            <span>Chapter 3: User Interface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter4/chapter4.html">
+                            <span>Chapter 4: Configurations</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter5/chapter5.html">
+                            <span>Chapter 5: Configuration Use Cases</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter6/chapter6.html">
+                            <span>Chapter 6: Command Line Tool Interface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../chapter7/chapter7.html">
+                            <span>Chapter 7: Default Configuration Backup Advisory</span>
+                        </a>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+    </body>
+</html>
